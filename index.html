@@ -1,523 +1,11 @@
-<!doctype html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>Amtscup Cup-Duell – Zwei Gruppen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #eef2f7;
-      color: #111827;
-    }
-    h1, h2, h3 {
-      margin: 0;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-    }
-    h1 {
-      font-size: 1.5rem;
-    }
-    h2 {
-      margin: 0 0 0.5rem 0;
-      color: #1f2933;
-      font-size: 1.2rem;
-    }
-    .page {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1rem 1rem 2rem 1rem;
-    }
-    .card {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      box-shadow: 0 4px 10px rgba(15,23,42,0.08);
-      margin-bottom: 1rem;
-    }
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-    .field {
-      flex: 1 1 220px;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      font-size: 0.9rem;
-    }
-    label {
-      font-weight: 600;
-      margin-bottom: 0.15rem;
-      color: #374151;
-    }
-    input[type="text"],
-    input[type="number"],
-    input[type="email"],
-    select,
-    textarea {
-      width: 100%;
-      font-family: inherit;
-      font-size: 0.95rem;
-      padding: 0.45rem 0.5rem;
-      border-radius: 8px;
-      border: 1px solid #d1d5db;
-      outline: none;
-      background: #f9fafb;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-    }
-    input[type="text"]:focus,
-    input[type="number"]:focus,
-    input[type="email"]:focus,
-    select:focus,
-    textarea:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 2px rgba(37,99,235,0.20);
-      background: #ffffff;
-    }
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-      line-height: 1.4;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      white-space: pre;
-    }
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: #e5edff;
-      color: #1d4ed8;
-      margin-left: 0.5rem;
-    }
-    .tag span {
-      margin-left: 0.35rem;
-      opacity: 0.85;
-      font-weight: 500;
-    }
-    .subtitle {
-      font-size: 0.86rem;
-      color: #6b7280;
-      margin-top: 0.4rem;
-    }
-    .section-title {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-    }
-    th, td {
-      padding: 0.4rem 0.5rem;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: left;
-    }
-    th {
-      background: #f3f4f6;
-      font-weight: 600;
-      font-size: 0.85rem;
-    }
-    td {
-      vertical-align: middle;
-    }
-    tfoot td {
-      font-weight: 600;
-      background: #f9fafb;
-    }
-    .align-right {
-      text-align: right;
-    }
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: 0.4rem;
-    }
-    .chip {
-      padding: 0.15rem 0.5rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      background: #e5e7eb;
-      color: #374151;
-    }
-    .muted {
-      font-size: 0.8rem;
-      color: #9ca3af;
-    }
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-    button {
-      border: none;
-      border-radius: 999px;
-      padding: 0.45rem 0.9rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.15s ease;
-    }
-    button:active {
-      transform: translateY(1px);
-      box-shadow: none;
-    }
-    .btn-primary {
-      background: #2563eb;
-      color: #ffffff;
-      box-shadow: 0 4px 10px rgba(37,99,235,0.25);
-    }
-    .btn-primary:hover {
-      background: #1d4ed8;
-    }
-    .btn-secondary {
-      background: #f3f4f6;
-      color: #111827;
-    }
-    .btn-secondary:hover {
-      background: #e5e7eb;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.1rem 0.5rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: #fef3c7;
-      color: #92400e;
-      margin-left: 0.4rem;
-    }
-    .admin-section {
-      margin-top: 1rem;
-      border-radius: 12px;
-      background: #f9fafb;
-      border: 1px dashed #d1d5db;
-      padding: 0.75rem 0.9rem;
-      font-size: 0.85rem;
-    }
-    .admin-section h3 {
-      font-size: 0.9rem;
-      margin-bottom: 0.35rem;
-    }
-    .admin-hint {
-      font-size: 0.8rem;
-      color: #6b7280;
-      margin-top: 0.25rem;
-    }
-    .admin-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      align-items: center;
-      margin-top: 0.4rem;
-    }
-    .admin-row input[type="password"] {
-      max-width: 200px;
-    }
-    .admin-badge {
-      background: #fef3c7;
-      color: #92400e;
-    }
-    .hidden {
-      display: none !important;
-    }
-    .flex-between {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .flex-end {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.5rem;
-      margin-top: 0.4rem;
-    }
-    .total-highlight {
-      font-weight: 700;
-      color: #2563eb;
-    }
-    .group-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 0.4rem;
-    }
-    .group-subtitle {
-      font-size: 0.8rem;
-      color: #6b7280;
-    }
-    @media (max-width: 720px) {
-      .page {
-        padding: 0.75rem 0.5rem 1.5rem 0.5rem;
-      }
-      .card {
-        padding: 0.9rem 0.8rem;
-      }
-      h1 {
-        font-size: 1.25rem;
-      }
-      .section-title {
-        font-size: 1rem;
-      }
-    }
-  </style>
-</head>
-<body>
-<div class="page">
-  <div class="card">
-    <div class="flex-between">
-      <div>
-        <h1>Amtscup – Cup-Duell (bis zu drei Gruppen)</h1>
-        <div class="subtitle">
-          Web-Formular für die Gruppenmeldung.<br>
-          <span class="muted">Daten bleiben im Browser gespeichert, bis du sie löschst.</span>
-        </div>
-      </div>
-      <div class="chips">
-        <div class="chip">Cup-Duell</div>
-        <div class="chip">Zwei / Drei Gruppen</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 1. Gruppenchef & Gruppen -->
-  <div class="card">
-    <h2 class="section-title">1. Gruppenchef &amp; Gruppen</h2>
-    <div class="row">
-      <div class="field">
-        <label for="chefName">Name Gruppenchef</label>
-        <input id="chefName" type="text" placeholder="Name Vorname">
-      </div>
-      <div class="field">
-        <label for="chefEmail">E-Mail Gruppenchef</label>
-        <input id="chefEmail" type="email" placeholder="name@verein.ch">
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="field">
-        <label for="gruppe1Select">Gruppe 1 (Liste)</label>
-        <select id="gruppe1Select"></select>
-      </div>
-      <div class="field">
-        <label for="gruppe1Other">Andere Gruppe 1<br><span class="muted">falls nicht in der Liste</span></label>
-        <input id="gruppe1Other" type="text" placeholder="Gruppe / Verein">
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="field">
-        <label for="gruppe2Select">Gruppe 2 (Liste)</label>
-        <select id="gruppe2Select"></select>
-      </div>
-      <div class="field">
-        <label for="gruppe2Other">Andere Gruppe 2<br><span class="muted">falls nicht in der Liste</span></label>
-        <input id="gruppe2Other" type="text" placeholder="Gruppe / Verein">
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="field">
-        <label for="gruppe3Select">Gruppe 3 (Liste)</label>
-        <select id="gruppe3Select"></select>
-      </div>
-      <div class="field">
-        <label for="gruppe3Other">Andere Gruppe 3<br><span class="muted">falls nicht in der Liste</span></label>
-        <input id="gruppe3Other" type="text" placeholder="Gruppe / Verein (optional)">
-      </div>
-    </div>
-
-    <div class="subtitle">
-      Gruppenliste wird automatisch aus <strong>Daten/gruppen.csv</strong> geladen.
-    </div>
-  </div>
-
-  <!-- 2. Schützen & Resultate – Gruppe 1 -->
-  <div class="card">
-    <div class="group-header">
-      <h2 class="section-title" id="gruppe1TitleLabel">2. Schützen &amp; Resultate – Gruppe 1</h2>
-      <div class="group-subtitle">Sportgerät wählen – Zuschlag wird automatisch übernommen. Total = Resultat + Zuschlag.</div>
-    </div>
-
-    <table>
-      <thead>
-      <tr>
-        <th>Schütze</th>
-        <th>Name Vorname*</th>
-        <th>Jahrgang*</th>
-        <th>Sportgerät*</th>
-        <th>Resultat*</th>
-        <th>Zuschlag</th>
-        <th>Total</th>
-      </tr>
-      </thead>
-      <tbody id="shootersBody1"></tbody>
-      <tfoot>
-      <tr>
-        <td colspan="4"><span class="muted">Summen Gruppe 1</span></td>
-        <td class="align-right total-highlight" id="sumResult1">0</td>
-        <td class="align-right total-highlight" id="sumBonus1">0</td>
-        <td class="align-right total-highlight" id="sumTotal1">0</td>
-      </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <!-- 3. Schützen & Resultate – Gruppe 2 -->
-  <div class="card">
-    <div class="group-header">
-      <h2 class="section-title" id="gruppe2TitleLabel">3. Schützen &amp; Resultate – Gruppe 2</h2>
-      <div class="group-subtitle">Gleiche Logik wie Gruppe 1.</div>
-    </div>
-
-    <table>
-      <thead>
-      <tr>
-        <th>Schütze</th>
-        <th>Name Vorname*</th>
-        <th>Jahrgang*</th>
-        <th>Sportgerät*</th>
-        <th>Resultat*</th>
-        <th>Zuschlag</th>
-        <th>Total</th>
-      </tr>
-      </thead>
-      <tbody id="shootersBody2"></tbody>
-      <tfoot>
-      <tr>
-        <td colspan="4"><span class="muted">Summen Gruppe 2</span></td>
-        <td class="align-right total-highlight" id="sumResult2">0</td>
-        <td class="align-right total-highlight" id="sumBonus2">0</td>
-        <td class="align-right total-highlight" id="sumTotal2">0</td>
-      </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <!-- 4. Schützen & Resultate – Gruppe 3 (optional) -->
-  <div class="card">
-    <div class="group-header">
-      <h2 class="section-title" id="gruppe3TitleLabel">4. Schützen &amp; Resultate – Gruppe 3 (optional)</h2>
-      <div class="group-subtitle">Nur ausfüllen, falls vorhanden.</div>
-    </div>
-
-    <table>
-      <thead>
-      <tr>
-        <th>Schütze</th>
-        <th>Name Vorname*</th>
-        <th>Jahrgang*</th>
-        <th>Sportgerät*</th>
-        <th>Resultat*</th>
-        <th>Zuschlag</th>
-        <th>Total</th>
-      </tr>
-      </thead>
-      <tbody id="shootersBody3"></tbody>
-      <tfoot>
-      <tr>
-        <td colspan="4"><span class="muted">Summen Gruppe 3</span></td>
-        <td class="align-right total-highlight" id="sumResult3">0</td>
-        <td class="align-right total-highlight" id="sumBonus3">0</td>
-        <td class="align-right total-highlight" id="sumTotal3">0</td>
-      </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <!-- 5. Vergleich & Sieger -->
-  <div class="card">
-    <h2 class="section-title">5. Vergleich &amp; Sieger</h2>
-    <p class="subtitle">
-      Die Totalsummen der beiden Gruppen werden verglichen, der Sieger wird hervorgehoben.
-    </p>
-    <table>
-      <thead>
-      <tr>
-        <th>Gruppe</th>
-        <th>Total</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr>
-        <td id="compareGroup1Label">Gruppe 1</td>
-        <td class="align-right" id="compareTotal1">0</td>
-      </tr>
-      <tr>
-        <td id="compareGroup2Label">Gruppe 2</td>
-        <td class="align-right" id="compareTotal2">0</td>
-      </tr>
-      <tr>
-        <td id="compareGroup3Label">Gruppe 3</td>
-        <td class="align-right" id="compareTotal3">0</td>
-      </tr>
-      </tbody>
-    </table>
-    <div class="subtitle">
-      <strong>Hinweis:</strong> Die Gruppe mit dem höchsten Total wird optisch hervorgehoben.
-    </div>
-  </div>
-
-  <!-- Admin-Info (ohne echten Editor) -->
-  <div class="card admin-section">
-    <h3>Admin: Gruppen / Vereine <span class="badge admin-badge">Info</span></h3>
-    <p class="admin-hint">
-      Die Gruppenliste wird jetzt automatisch aus der Datei <code>Daten/gruppen.csv</code> geladen.
-      Passe diese Datei direkt im GitHub-Repository an, wenn sich die Paarungen ändern.
-    </p>
-    <textarea id="groupsText" readonly></textarea>
-  </div>
-</div>
-
 <script>
   /////////////////////////////////////////////////
-  //  Grunddaten & Hilfsfunktionen
+  //  Gruppen laden aus TEXT-Datei statt CSV
   /////////////////////////////////////////////////
 
-  const DEFAULT_GROUPS_TEXT = `1 Heim 4 A025 H&auml;utligen FS Wolfmatt 1 Gast 4 A004 Allmendingen FS Chlepfcheibe 2 Heim 4 A059 Sportsch&uuml;tzen Furth Zorro 2 Gast 4 A042 Oberdiessbach SG Madagaskar 3 Heim 4 A043 Oberdiessbach SG Mouchenwasser 3 Gast 4 A049 Oberthal MS TEAM 2014 4 Heim 4 A055 Sch&uuml;tzen Grossh&ouml;chstetten Waldrand 4 Gast 4 A036 Linden FS Alfa Romeo 5 Heim 4 A023 H&auml;utligen FS Eggacher 5 Gast 4 A047 Oberthal MS Hasechlu pf 6 Heim 4 A052 Richigen FS TEAM CRAFT 6 Gast 4 A021 Gysenstein FS Ringkorn 7 Heim 4 A069 Wichtrach Sch&uuml;tzen Top- Gun 7 Gast 4 A007 Arni FS Gunners 8 Heim 4 A022 H&auml;utligen FS Buchholz 8 Gast 4 A002 Aaresch&uuml;tzen Kiesen Oppligen Bahnhofli`;
-
-  const SPORT_TYPES = [
-    { value: "stgw57", label: "Stgw 57", bonus: 0 },
-    { value: "stgw90", label: "Stgw 90", bonus: 0 },
-    { value: "stgwOther", label: "Anderes Gewehr", bonus: 0 },
-    { value: "p25", label: "Pistole 25m", bonus: 0 },
-    { value: "p50", label: "Pistole 50m", bonus: 0 },
-    { value: "auflage", label: "Auflage", bonus: -5 },
-    { value: "junior", label: "Junioren", bonus: 5 }
-  ];
+  const DEFAULT_GROUPS_TEXT = `Keine Gruppen geladen – Fallback aktiviert.`;
 
   let groupsList = [];
-
-  function createSportOptions(selectEl) {
-    selectEl.innerHTML = "";
-    const placeholderOpt = document.createElement("option");
-    placeholderOpt.value = "";
-    placeholderOpt.textContent = "Bitte wählen …";
-    selectEl.appendChild(placeholderOpt);
-    SPORT_TYPES.forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s.value;
-      opt.textContent = s.label;
-      selectEl.appendChild(opt);
-    });
-  }
 
   function parseGroups(text) {
     return text
@@ -526,76 +14,49 @@
       .filter(l => l.length > 0);
   }
 
-  // NEUE VERSION: lädt Gruppen aus Daten/gruppen.csv
+  // NEU: LÄDT gruppen.txt STATT gruppen.csv
   function loadGroups() {
     const selects = [
       document.getElementById("gruppe1Select"),
       document.getElementById("gruppe2Select"),
       document.getElementById("gruppe3Select")
-    ].filter(Boolean);
+    ];
 
-    // Zuerst alle Selects leeren und Platzhalter einsetzen
+    // Select-Felder leeren + Platzhalter
     selects.forEach(select => {
       select.innerHTML = "";
-      const placeholderOpt = document.createElement("option");
-      placeholderOpt.value = "";
-      placeholderOpt.textContent = "Bitte wählen …";
-      select.appendChild(placeholderOpt);
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "Bitte wählen …";
+      select.appendChild(opt);
     });
 
-    // Gruppenliste aus der CSV-Datei im Ordner "Daten" laden
-    fetch("Daten/gruppen.csv")
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Fehler beim Laden der gruppen.csv: " + response.status);
-        }
-        return response.text();
-      })
+    // → Dateiformat jetzt .txt – keine CSV-Fehler mehr
+    fetch("Daten/gruppen.txt")
+      .then(response => response.text())
       .then(text => {
-        const lines = text
-          .split(/\r?\n/)
-          .map(l => l.trim())
-          .filter(l => l.length > 0);
+        const lines = parseGroups(text);
 
-        // Anzeige: "GrpNr – Sektion Gruppenname"
-        groupsList = lines
-          .map(line => {
-            const parts = line.split(";");
-            if (parts.length < 6) {
-              return null;
-            }
-            const grpNr       = parts[3].trim();
-            const sektion     = parts[4].trim();
-            const gruppenname = parts[5].trim();
-            return grpNr + " – " + sektion + " " + gruppenname;
-          })
-          .filter(Boolean);
+        groupsList = lines; // Jede Zeile = ein Eintrag
 
-        // Select-Felder mit den geladenen Gruppen füllen
         selects.forEach(select => {
-          groupsList.forEach(label => {
+          lines.forEach(line => {
             const opt = document.createElement("option");
-            opt.value = label;
-            opt.textContent = label;
+            opt.value = line;
+            opt.textContent = line;
             select.appendChild(opt);
           });
         });
 
-        // Admin-Textarea nur noch als Hinweis verwenden
         const area = document.getElementById("groupsText");
-        if (area) {
-          area.value =
-            "Die Gruppenliste wird jetzt automatisch aus der Datei 'Daten/gruppen.csv' geladen.\n" +
-            "Bitte passe die Gruppen direkt in dieser Datei auf GitHub an.";
-          area.readOnly = true;
-        }
+        area.value = text;
+        area.readOnly = true;
 
         updateGroupTitles();
       })
       .catch(err => {
-        console.error(err);
+        console.error("Fehler beim Laden gruppen.txt:", err);
 
-        // Fallback: altes Standardverhalten mit DEFAULT_GROUPS_TEXT
         groupsList = parseGroups(DEFAULT_GROUPS_TEXT);
         selects.forEach(select => {
           groupsList.forEach(g => {
@@ -605,187 +66,33 @@
             select.appendChild(opt);
           });
         });
-
-        const area = document.getElementById("groupsText");
-        if (area) {
-          area.value = DEFAULT_GROUPS_TEXT;
-          area.readOnly = false;
-        }
-
-        updateGroupTitles();
       });
   }
 
   function getEffectiveGroupName(which) {
-    if (which === 1) {
-      const other = document.getElementById("gruppe1Other").value.trim();
-      if (other) return other;
-      const sel = document.getElementById("gruppe1Select").value.trim();
-      return sel || "";
-    } else if (which === 2) {
-      const other = document.getElementById("gruppe2Other").value.trim();
-      if (other) return other;
-      const sel = document.getElementById("gruppe2Select").value.trim();
-      return sel || "";
-    } else if (which === 3) {
-      const other = document.getElementById("gruppe3Other").value.trim();
-      if (other) return other;
-      const sel = document.getElementById("gruppe3Select").value.trim();
-      return sel || "";
-    }
-    return "";
+    const select = document.getElementById(`gruppe${which}Select`).value.trim();
+    const other = document.getElementById(`gruppe${which}Other`).value.trim();
+    return other || select || "";
   }
 
   function updateGroupTitles() {
-    const g1 = getEffectiveGroupName(1) || "Gruppe 1";
-    const g2 = getEffectiveGroupName(2) || "Gruppe 2";
-    const g3 = getEffectiveGroupName(3) || "Gruppe 3";
-    document.getElementById("gruppe1TitleLabel").textContent = "2. Schützen & Resultate – " + g1;
-    document.getElementById("gruppe2TitleLabel").textContent = "3. Schützen & Resultate – " + g2;
-    const t3 = document.getElementById("gruppe3TitleLabel");
-    if (t3) t3.textContent = "4. Schützen & Resultate – " + g3;
+    document.getElementById("gruppe1TitleLabel").textContent =
+      "2. Schützen & Resultate – " + (getEffectiveGroupName(1) || "Gruppe 1");
+    document.getElementById("gruppe2TitleLabel").textContent =
+      "3. Schützen & Resultate – " + (getEffectiveGroupName(2) || "Gruppe 2");
+    document.getElementById("gruppe3TitleLabel").textContent =
+      "4. Schützen & Resultate – " + (getEffectiveGroupName(3) || "Gruppe 3");
 
-    document.getElementById("compareGroup1Label").textContent = g1;
-    document.getElementById("compareGroup2Label").textContent = g2;
-    document.getElementById("compareGroup3Label").textContent = g3;
+    document.getElementById("compareGroup1Label").textContent = getEffectiveGroupName(1);
+    document.getElementById("compareGroup2Label").textContent = getEffectiveGroupName(2);
+    document.getElementById("compareGroup3Label").textContent = getEffectiveGroupName(3);
   }
 
-  function createGroupRows(group) {
-    const tbody = document.getElementById(group === 1 ? "shootersBody1" :
-      group === 2 ? "shootersBody2" : "shootersBody3");
-    tbody.innerHTML = "";
-    for (let i = 1; i <= 5; i++) {
-      const tr = document.createElement("tr");
-      tr.dataset.group = group;
-      tr.dataset.index = i;
-      tr.innerHTML = `
-          <td>Schütze ${i}</td>
-          <td><input type="text" class="name-input" placeholder="Name Vorname"></td>
-          <td><input type="number" class="year-input" min="1900" max="2100" placeholder="Jahrgang"></td>
-          <td><select class="geraet-select"></select></td>
-          <td><input type="number" class="result-input" min="0" placeholder="0"></td>
-          <td class="align-right bonus-cell">0</td>
-          <td class="align-right total-cell">0</td>
-        `;
-      tbody.appendChild(tr);
-    }
+  /////////////////////////////////////////////////
+  //  INIT
+  /////////////////////////////////////////////////
 
-    const selects = tbody.querySelectorAll(".geraet-select");
-    selects.forEach(sel => createSportOptions(sel));
-
-    const inputs = tbody.querySelectorAll(".result-input, .geraet-select");
-    inputs.forEach(inp => {
-      inp.addEventListener("input", () => recalcGroupTotals(group));
-      inp.addEventListener("change", () => recalcGroupTotals(group));
-    });
-  }
-
-  function getBonusFor(selectValue) {
-    const found = SPORT_TYPES.find(s => s.value === selectValue);
-    return found ? found.bonus : 0;
-  }
-
-  function recalcGroupTotals(group) {
-    const tbody = document.getElementById(group === 1 ? "shootersBody1" :
-      group === 2 ? "shootersBody2" : "shootersBody3");
-    const rows = Array.from(tbody.querySelectorAll("tr"));
-
-    let sumResult = 0;
-    let sumBonus  = 0;
-    let sumTotal  = 0;
-
-    rows.forEach(tr => {
-      const resultInput = tr.querySelector(".result-input");
-      const select      = tr.querySelector(".geraet-select");
-      const bonusCell   = tr.querySelector(".bonus-cell");
-      const totalCell   = tr.querySelector(".total-cell");
-
-      const resultVal = parseFloat(resultInput.value) || 0;
-      const bonus     = getBonusFor(select.value);
-      const total     = resultVal + bonus;
-
-      bonusCell.textContent = bonus.toFixed(1).replace(".0", "");
-      totalCell.textContent = total.toFixed(1).replace(".0", "");
-
-      sumResult += resultVal;
-      sumBonus  += bonus;
-      sumTotal  += total;
-    });
-
-    if (group === 1) {
-      document.getElementById("sumResult1").textContent = sumResult.toFixed(1).replace(".0", "");
-      document.getElementById("sumBonus1").textContent  = sumBonus.toFixed(1).replace(".0", "");
-      document.getElementById("sumTotal1").textContent  = sumTotal.toFixed(1).replace(".0", "");
-    } else if (group === 2) {
-      document.getElementById("sumResult2").textContent = sumResult.toFixed(1).replace(".0", "");
-      document.getElementById("sumBonus2").textContent  = sumBonus.toFixed(1).replace(".0", "");
-      document.getElementById("sumTotal2").textContent  = sumTotal.toFixed(1).replace(".0", "");
-    } else if (group === 3) {
-      document.getElementById("sumResult3").textContent = sumResult.toFixed(1).replace(".0", "");
-      document.getElementById("sumBonus3").textContent  = sumBonus.toFixed(1).replace(".0", "");
-      document.getElementById("sumTotal3").textContent  = sumTotal.toFixed(1).replace(".0", "");
-    }
-
-    updateComparisonTotals();
-  }
-
-  function updateComparisonTotals() {
-    const t1 = parseFloat(document.getElementById("sumTotal1").textContent) || 0;
-    const t2 = parseFloat(document.getElementById("sumTotal2").textContent) || 0;
-    const t3El = document.getElementById("sumTotal3");
-    const t3 = t3El ? (parseFloat(t3El.textContent) || 0) : 0;
-
-    document.getElementById("compareTotal1").textContent = t1.toFixed(1).replace(".0", "");
-    document.getElementById("compareTotal2").textContent = t2.toFixed(1).replace(".0", "");
-    document.getElementById("compareTotal3").textContent = t3.toFixed(1).replace(".0", "");
-
-    const rows = [
-      { el: document.getElementById("compareTotal1").parentElement, total: t1 },
-      { el: document.getElementById("compareTotal2").parentElement, total: t2 },
-      { el: document.getElementById("compareTotal3").parentElement, total: t3 }
-    ];
-
-    rows.forEach(r => {
-      r.el.style.fontWeight = "normal";
-      r.el.style.background = "";
-    });
-
-    const maxTotal = Math.max(t1, t2, t3);
-    rows.forEach(r => {
-      if (r.total === maxTotal && maxTotal > 0) {
-        r.el.style.fontWeight = "700";
-        r.el.style.background = "#e0f2fe";
-      }
-    });
-  }
-
-  function init() {
-    createGroupRows(1);
-    createGroupRows(2);
-    createGroupRows(3);
+  window.addEventListener("load", () => {
     loadGroups();
-
-    document.getElementById("chefName").addEventListener("input", persistForm);
-    document.getElementById("chefEmail").addEventListener("input", persistForm);
-    document.getElementById("gruppe1Other").addEventListener("input", () => {
-      updateGroupTitles();
-      persistForm();
-    });
-    document.getElementById("gruppe2Other").addEventListener("input", () => {
-      updateGroupTitles();
-      persistForm();
-    });
-    document.getElementById("gruppe3Other").addEventListener("input", () => {
-      updateGroupTitles();
-      persistForm();
-    });
-  }
-
-  function persistForm() {
-    // hier könnte man später LocalStorage nutzen, wenn gewünscht
-  }
-
-  window.addEventListener("load", init);
+  });
 </script>
-</body>
-</html>
