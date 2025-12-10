@@ -498,9 +498,11 @@ Burgdorf – Gruppe Rot`;
     }
 
     function loadGroups() {
-      const stored = localStorage.getItem("amtscupGroupsText");
-      const text = stored && stored.trim().length > 0 ? stored : DEFAULT_GROUPS_TEXT;
-      groupsList = parseGroups(text);
+      const selects = [
+        document.getElementById("gruppe1Select"),
+        document.getElementById("gruppe2Select"),
+        document.getElementById("gruppe3Select")
+      ].filter(Boolean);
 
       const selects = [document.getElementById("gruppe1Select"), document.getElementById("gruppe2Select"), document.getElementById("gruppe3Select")];
       selects.forEach(select => {
