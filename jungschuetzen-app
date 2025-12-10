@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Jungschützen – Gruppenmeldung</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2f7;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 18px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 { margin-top: 0; }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 6px;
+      text-align: left;
+    }
+
+    th {
+      background: #f3f3f3;
+    }
+
+    .total {
+      font-weight: bold;
+      color: #0055cc;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Jungschützen – Gruppenmeldung</h1>
+
+  <label>Gruppenchef</label>
+  <input id="chefName" placeholder="Name Vorname">
+
+  <label>E-Mail</label>
+  <input id="chefEmail" type="email" placeholder="name@verein.ch">
+
+  <h3>Gruppe 1</h3>
+  <select id="g1Select"></select>
+  <input id="g1Other" placeholder="Falls nicht in Liste">
+
+  <h3>Gruppe 2</h3>
+  <select id="g2Select"></select>
+  <input id="g2Other" placeholder="Falls nicht in Liste">
+
+  <h3>Gruppe 3 (optional)</h3>
+  <select id="g3Select"></select>
+  <input id="g3Other" placeholder="Falls nicht in Liste">
+</div>
+
+<div class="card">
+  <h2 id="g1Title">Schützen – Gruppe 1</h2>
+  <table>
+    <thead>
+      <tr><th>Schütze</th><th>Name</th><th>Jahrgang</th><th>Resultat</th><th>Total</th></tr>
+    </thead>
+    <tbody id="g1Table"></tbody>
+    <tfoot><tr><td colspan="3"></td><td class="total" id="g1SumR">0</td><td class="total" id="g1SumT">0</td></tr></tfoot>
+  </table>
+</div>
+
+<div class="card">
+  <h2 id="g2Title">Schützen – Gruppe 2</h2>
+  <table>
+    <thead>
+      <tr><th>Schütze</th><th>Name</th><th>Jahrgang</th><th>Resultat</th><th>Total</th></tr>
+    </thead>
+    <tbody id="g2Table"></tbody>
+    <tfoot><tr><td colspan="3"></td><td class="total" id="g2SumR">0</td><td class="total" id="g2SumT">0</td></tr></tfoot>
+  </table>
+</div>
+
+<div class="card">
+  <h2 id="g3Title">Schützen – Gruppe 3</h2>
+  <table>
+    <thead>
+      <tr><th>Schütze</th><th>Name</th><th>Jahrgang</th><th>Resultat</th><th>Total</th></tr>
+    </thead>
+    <tbody id="g3Table"></tbody>
+    <tfoot><tr><td colspan="3"></td><td class="total" id="g3SumR">0</td><td class="total" id="g3SumT">0</td></tr></tfoot>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Vergleich</h2>
+  <table>
+    <tr><td id="c1Name">Gruppe 1</td><td class="total" id="c1Val">0</td></tr>
+    <tr><td id="c2Name">Gruppe 2</td><td class="total" id="c2Val">0</td></tr>
+    <tr><td id="c3Name">Gruppe 3</td><td class="total" id="c3Val">0</td></tr>
+  </table>
+</div>
+
+<script>
+async function loadGroups() {
+  const selects = [g1Select, g2Select, g3Select];
+  selects.forEach(s => s.innerHTML = "<option value=''>Bitte wählen …</option>");
+
+  try {
+    const t = await (await fetch("gruppen.txt")).text();
+    const lines = t.split(/\r?\n/).filter(l => l.trim());
+
+    lines.forEach(line => {
+      selects.forEach(s => {
+        const o = document.createElement("option");
+        o.textContent = line;
+        o.value = line;
+        s.appendChild(o);
+      });
+    });
+
+  } catch (e) {
+    alert("gruppen.txt konnte nicht geladen werden!");
+  }
+}
+
+function createRows(id) {
+  const tbody = document.getElementById(id);
+  tbody.innerHTML = "";
+  for (let i = 1; i <= 4; i++) {
+    tbody.innerHTML += `
+      <tr>
+        <td>Schütze ${i}</td>
+        <td><input class="name"></td>
+        <td><input class="year"></td>
+        <td><input class="res" type="number"></td>
+        <td class="total">0</td>
+      </tr>`;
+  }
+}
+
+function calc(table, sumR, sumT) {
+  let R = 0, T = 0;
+  document.querySelectorAll(`#${table} .res`).forEach(inp => {
+    const v = parseFloat(inp.value) || 0;
+    R += v;
+    T += v;
+    inp.parentElement.parentElement.querySelector(".total").textContent = v;
+  });
+  document.getElementById(sumR).textContent = R;
+  document.getElementById(sumT).textContent = T;
+}
+
+setInterval(() => {
+  calc("g1Table", "g1SumR", "g1SumT");
+  calc("g2Table", "g2SumR", "g2SumT");
+  calc("g3Table", "g3SumR", "g3SumT");
+
+  c1Val.textContent = g1SumT.textContent;
+  c2Val.textContent = g2SumT.textContent;
+  c3Val.textContent = g3SumT.textContent;
+
+  c1Name.textContent = g1Select.value;
+  c2Name.textContent = g2Select.value;
+  c3Name.textContent = g3Select.value;
+}, 200);
+
+window.onload = () => {
+  loadGroups();
+  createRows("g1Table");
+  createRows("g2Table");
+  createRows("g3Table");
+};
+</script>
+
+</body>
+</html>
