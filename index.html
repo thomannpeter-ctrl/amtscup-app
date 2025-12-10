@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="de">
-
 <head>
   <meta charset="UTF-8">
   <title>Amtscup – Gruppenmeldung</title>
@@ -12,7 +11,6 @@
       background: #eef2f7;
       padding: 20px;
     }
-
     .card {
       background: #fff;
       padding: 18px;
@@ -20,50 +18,40 @@
       margin-bottom: 20px;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     }
-
     h1 {
       margin-top: 0;
     }
-
     label {
       font-weight: bold;
       display: block;
       margin-bottom: 4px;
     }
-
-    input,
-    select,
-    textarea {
+    input, select, textarea {
       width: 100%;
       padding: 8px;
       margin-bottom: 12px;
       border: 1px solid #ccc;
       border-radius: 6px;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 12px;
     }
-
     th, td {
       border-bottom: 1px solid #ddd;
       padding: 6px;
       text-align: left;
     }
-
     th {
       background: #f3f3f3;
     }
-
     .total {
       font-weight: bold;
       color: #0055cc;
     }
   </style>
 </head>
-
 <body>
   <div class="card">
     <h1>Amtscup – Gruppenmeldung</h1>
@@ -86,7 +74,6 @@
     <select id="gruppe3Select"></select>
     <input id="gruppe3Other" type="text" placeholder="Falls nicht in Liste">
   </div>
-
 
   <div class="card">
     <h2 id="g1Title">Schützen & Resultate – Gruppe 1</h2>
@@ -114,7 +101,6 @@
     </table>
   </div>
 
-
   <div class="card">
     <h2 id="g2Title">Schützen & Resultate – Gruppe 2</h2>
     <table>
@@ -140,7 +126,6 @@
       </tfoot>
     </table>
   </div>
-
 
   <div class="card">
     <h2 id="g3Title">Schützen & Resultate – Gruppe 3</h2>
@@ -168,10 +153,8 @@
     </table>
   </div>
 
-
   <div class="card">
     <h2>Vergleich</h2>
-
     <table>
       <tr>
         <td id="c1Name">Gruppe 1</td>
@@ -188,18 +171,15 @@
     </table>
   </div>
 
-
   <div class="card">
     <h3>Admin – Gruppenliste</h3>
     <textarea id="groupsText" readonly></textarea>
   </div>
 
-
   <script>
-    // ----------------------------------------------------------
-    // GRUPPEN LADEN (NEU: gruppen.txt statt gruppen.csv!)
-    // ----------------------------------------------------------
-
+    // ----------------------------
+    // Gruppen aus gruppen.txt laden
+    // ----------------------------
     async function loadGroups() {
       const selects = [
         document.getElementById("gruppe1Select"),
@@ -207,20 +187,19 @@
         document.getElementById("gruppe3Select")
       ];
 
-      // Alle Selects leeren
       selects.forEach(s => {
         s.innerHTML = "<option value=''>Bitte wählen …</option>";
       });
 
       try {
-        const response = await fetch("Daten/gruppen.txt");
+        // WICHTIG: gruppen.txt liegt im gleichen Ordner wie index.html
+        const response = await fetch("gruppen.txt");
         const text = await response.text();
 
         document.getElementById("groupsText").value = text;
 
         const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
 
-        // Jede Zeile = eigener Eintrag
         lines.forEach(line => {
           selects.forEach(sel => {
             const opt = document.createElement("option");
@@ -231,14 +210,13 @@
         });
 
       } catch (e) {
-        alert("Fehler beim Laden der Gruppenliste!");
+        alert("Fehler beim Laden der Gruppenliste: " + e);
       }
     }
 
-    // ----------------------------------------------------------
-    // SCHÜTZENTABELLE AUFBAUEN
-    // ----------------------------------------------------------
-
+    // ----------------------------
+    // Schützen-Tabelle
+    // ----------------------------
     const sportgeräte = [
       { name: "Stgw57", bonus: 0 },
       { name: "Stgw90", bonus: 0 },
@@ -301,14 +279,12 @@
       document.getElementById("c2Val").textContent = document.getElementById("g2SumT").textContent;
       document.getElementById("c3Val").textContent = document.getElementById("g3SumT").textContent;
 
-      document.getElementById("c1Name").textContent = document.getElementById("gruppe1Select").value;
-      document.getElementById("c2Name").textContent = document.getElementById("gruppe2Select").value;
-      document.getElementById("c3Name").textContent = document.getElementById("gruppe3Select").value;
+      document.getElementById("c1Name").textContent = document.getElementById("gruppe1Select").value || "Gruppe 1";
+      document.getElementById("c2Name").textContent = document.getElementById("gruppe2Select").value || "Gruppe 2";
+      document.getElementById("c3Name").textContent = document.getElementById("gruppe3Select").value || "Gruppe 3";
     }
 
-    // ----------------------------------------------------------
-    // INIT
-    // ----------------------------------------------------------
+    // Init
     window.onload = () => {
       loadGroups();
 
@@ -323,6 +299,5 @@
       }, 200);
     };
   </script>
-
 </body>
 </html>
