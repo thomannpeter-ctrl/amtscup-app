@@ -1,98 +1,328 @@
-<script>
-  /////////////////////////////////////////////////
-  //  Gruppen laden aus TEXT-Datei statt CSV
-  /////////////////////////////////////////////////
+<!doctype html>
+<html lang="de">
 
-  const DEFAULT_GROUPS_TEXT = `Keine Gruppen geladen – Fallback aktiviert.`;
+<head>
+  <meta charset="UTF-8">
+  <title>Amtscup – Gruppenmeldung</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  let groupsList = [];
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2f7;
+      padding: 20px;
+    }
 
-  function parseGroups(text) {
-    return text
-      .split(/\r?\n/)
-      .map(l => l.trim())
-      .filter(l => l.length > 0);
-  }
+    .card {
+      background: #fff;
+      padding: 18px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
 
-  // NEU: LÄDT gruppen.txt STATT gruppen.csv
-  function loadGroups() {
-    const selects = [
-      document.getElementById("gruppe1Select"),
-      document.getElementById("gruppe2Select"),
-      document.getElementById("gruppe3Select")
+    h1 {
+      margin-top: 0;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 6px;
+      text-align: left;
+    }
+
+    th {
+      background: #f3f3f3;
+    }
+
+    .total {
+      font-weight: bold;
+      color: #0055cc;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>Amtscup – Gruppenmeldung</h1>
+
+    <label for="chefName">Name Gruppenchef</label>
+    <input id="chefName" type="text" placeholder="Name Vorname">
+
+    <label for="chefEmail">E-Mail</label>
+    <input id="chefEmail" type="email" placeholder="name@verein.ch">
+
+    <h3>Gruppe 1</h3>
+    <select id="gruppe1Select"></select>
+    <input id="gruppe1Other" type="text" placeholder="Falls nicht in Liste">
+
+    <h3>Gruppe 2</h3>
+    <select id="gruppe2Select"></select>
+    <input id="gruppe2Other" type="text" placeholder="Falls nicht in Liste">
+
+    <h3>Gruppe 3 (optional)</h3>
+    <select id="gruppe3Select"></select>
+    <input id="gruppe3Other" type="text" placeholder="Falls nicht in Liste">
+  </div>
+
+
+  <div class="card">
+    <h2 id="g1Title">Schützen & Resultate – Gruppe 1</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Schütze</th>
+          <th>Name</th>
+          <th>Jahrgang</th>
+          <th>Gerät</th>
+          <th>Resultat</th>
+          <th>Zuschlag</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="g1Table"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4"></td>
+          <td class="total" id="g1SumR">0</td>
+          <td class="total" id="g1SumB">0</td>
+          <td class="total" id="g1SumT">0</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+
+  <div class="card">
+    <h2 id="g2Title">Schützen & Resultate – Gruppe 2</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Schütze</th>
+          <th>Name</th>
+          <th>Jahrgang</th>
+          <th>Gerät</th>
+          <th>Resultat</th>
+          <th>Zuschlag</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="g2Table"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4"></td>
+          <td class="total" id="g2SumR">0</td>
+          <td class="total" id="g2SumB">0</td>
+          <td class="total" id="g2SumT">0</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+
+  <div class="card">
+    <h2 id="g3Title">Schützen & Resultate – Gruppe 3</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Schütze</th>
+          <th>Name</th>
+          <th>Jahrgang</th>
+          <th>Gerät</th>
+          <th>Resultat</th>
+          <th>Zuschlag</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="g3Table"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4"></td>
+          <td class="total" id="g3SumR">0</td>
+          <td class="total" id="g3SumB">0</td>
+          <td class="total" id="g3SumT">0</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+
+  <div class="card">
+    <h2>Vergleich</h2>
+
+    <table>
+      <tr>
+        <td id="c1Name">Gruppe 1</td>
+        <td class="total" id="c1Val">0</td>
+      </tr>
+      <tr>
+        <td id="c2Name">Gruppe 2</td>
+        <td class="total" id="c2Val">0</td>
+      </tr>
+      <tr>
+        <td id="c3Name">Gruppe 3</td>
+        <td class="total" id="c3Val">0</td>
+      </tr>
+    </table>
+  </div>
+
+
+  <div class="card">
+    <h3>Admin – Gruppenliste</h3>
+    <textarea id="groupsText" readonly></textarea>
+  </div>
+
+
+  <script>
+    // ----------------------------------------------------------
+    // GRUPPEN LADEN (NEU: gruppen.txt statt gruppen.csv!)
+    // ----------------------------------------------------------
+
+    async function loadGroups() {
+      const selects = [
+        document.getElementById("gruppe1Select"),
+        document.getElementById("gruppe2Select"),
+        document.getElementById("gruppe3Select")
+      ];
+
+      // Alle Selects leeren
+      selects.forEach(s => {
+        s.innerHTML = "<option value=''>Bitte wählen …</option>";
+      });
+
+      try {
+        const response = await fetch("Daten/gruppen.txt");
+        const text = await response.text();
+
+        document.getElementById("groupsText").value = text;
+
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+
+        // Jede Zeile = eigener Eintrag
+        lines.forEach(line => {
+          selects.forEach(sel => {
+            const opt = document.createElement("option");
+            opt.textContent = line;
+            opt.value = line;
+            sel.appendChild(opt);
+          });
+        });
+
+      } catch (e) {
+        alert("Fehler beim Laden der Gruppenliste!");
+      }
+    }
+
+    // ----------------------------------------------------------
+    // SCHÜTZENTABELLE AUFBAUEN
+    // ----------------------------------------------------------
+
+    const sportgeräte = [
+      { name: "Stgw57", bonus: 0 },
+      { name: "Stgw90", bonus: 0 },
+      { name: "Pistole 25m", bonus: 0 },
+      { name: "Pistole 50m", bonus: 0 },
+      { name: "Auflage", bonus: -5 },
+      { name: "Junior", bonus: 5 }
     ];
 
-    // Select-Felder leeren + Platzhalter
-    selects.forEach(select => {
-      select.innerHTML = "";
-      const opt = document.createElement("option");
-      opt.value = "";
-      opt.textContent = "Bitte wählen …";
-      select.appendChild(opt);
-    });
+    function createTableRows(tbodyId) {
+      const tbody = document.getElementById(tbodyId);
+      tbody.innerHTML = "";
 
-    // → Dateiformat jetzt .txt – keine CSV-Fehler mehr
-    fetch("Daten/gruppen.txt")
-      .then(response => response.text())
-      .then(text => {
-        const lines = parseGroups(text);
+      for (let i = 1; i <= 5; i++) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>Schütze ${i}</td>
+          <td><input></td>
+          <td><input></td>
+          <td>
+            <select>
+              <option value="">Bitte wählen</option>
+              ${sportgeräte.map(s => `<option data-bonus="${s.bonus}" value="${s.name}">${s.name}</option>`).join("")}
+            </select>
+          </td>
+          <td><input class="res" type="number"></td>
+          <td class="bonus">0</td>
+          <td class="total">0</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
 
-        groupsList = lines; // Jede Zeile = ein Eintrag
+    function calcTotals(tbodyId, sumR, sumB, sumT) {
+      const rows = document.querySelectorAll(`#${tbodyId} tr`);
+      let R = 0, B = 0, T = 0;
 
-        selects.forEach(select => {
-          lines.forEach(line => {
-            const opt = document.createElement("option");
-            opt.value = line;
-            opt.textContent = line;
-            select.appendChild(opt);
-          });
-        });
+      rows.forEach(r => {
+        const result = parseFloat(r.querySelector(".res").value) || 0;
+        const bonus = parseFloat(r.querySelector("select").selectedOptions[0].dataset.bonus || 0);
+        const total = result + bonus;
 
-        const area = document.getElementById("groupsText");
-        area.value = text;
-        area.readOnly = true;
+        r.querySelector(".bonus").textContent = bonus;
+        r.querySelector(".total").textContent = total;
 
-        updateGroupTitles();
-      })
-      .catch(err => {
-        console.error("Fehler beim Laden gruppen.txt:", err);
-
-        groupsList = parseGroups(DEFAULT_GROUPS_TEXT);
-        selects.forEach(select => {
-          groupsList.forEach(g => {
-            const opt = document.createElement("option");
-            opt.value = g;
-            opt.textContent = g;
-            select.appendChild(opt);
-          });
-        });
+        R += result;
+        B += bonus;
+        T += total;
       });
-  }
 
-  function getEffectiveGroupName(which) {
-    const select = document.getElementById(`gruppe${which}Select`).value.trim();
-    const other = document.getElementById(`gruppe${which}Other`).value.trim();
-    return other || select || "";
-  }
+      document.getElementById(sumR).textContent = R;
+      document.getElementById(sumB).textContent = B;
+      document.getElementById(sumT).textContent = T;
 
-  function updateGroupTitles() {
-    document.getElementById("gruppe1TitleLabel").textContent =
-      "2. Schützen & Resultate – " + (getEffectiveGroupName(1) || "Gruppe 1");
-    document.getElementById("gruppe2TitleLabel").textContent =
-      "3. Schützen & Resultate – " + (getEffectiveGroupName(2) || "Gruppe 2");
-    document.getElementById("gruppe3TitleLabel").textContent =
-      "4. Schützen & Resultate – " + (getEffectiveGroupName(3) || "Gruppe 3");
+      updateComparison();
+    }
 
-    document.getElementById("compareGroup1Label").textContent = getEffectiveGroupName(1);
-    document.getElementById("compareGroup2Label").textContent = getEffectiveGroupName(2);
-    document.getElementById("compareGroup3Label").textContent = getEffectiveGroupName(3);
-  }
+    function updateComparison() {
+      document.getElementById("c1Val").textContent = document.getElementById("g1SumT").textContent;
+      document.getElementById("c2Val").textContent = document.getElementById("g2SumT").textContent;
+      document.getElementById("c3Val").textContent = document.getElementById("g3SumT").textContent;
 
-  /////////////////////////////////////////////////
-  //  INIT
-  /////////////////////////////////////////////////
+      document.getElementById("c1Name").textContent = document.getElementById("gruppe1Select").value;
+      document.getElementById("c2Name").textContent = document.getElementById("gruppe2Select").value;
+      document.getElementById("c3Name").textContent = document.getElementById("gruppe3Select").value;
+    }
 
-  window.addEventListener("load", () => {
-    loadGroups();
-  });
-</script>
+    // ----------------------------------------------------------
+    // INIT
+    // ----------------------------------------------------------
+    window.onload = () => {
+      loadGroups();
+
+      createTableRows("g1Table");
+      createTableRows("g2Table");
+      createTableRows("g3Table");
+
+      setInterval(() => {
+        calcTotals("g1Table", "g1SumR", "g1SumB", "g1SumT");
+        calcTotals("g2Table", "g2SumR", "g2SumB", "g2SumT");
+        calcTotals("g3Table", "g3SumR", "g3SumB", "g3SumT");
+      }, 200);
+    };
+  </script>
+
+</body>
+</html>
