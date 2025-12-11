@@ -1,78 +1,720 @@
-/* ---------------------------  
-   GitHub Gruppenliste laden  
---------------------------- */
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+  const RESULT_EMAIL = "thomannpeter@bluewin.ch";
+  const ADMIN_PASSWORD = "amtscup2025";
 
-const GITHUB_GROUPS_URL =
-  "https://raw.githubusercontent.com/thomannpeter-ctrl/amtscup-App/main/gruppen.txt";
+  /* ---------------------------
+     GitHub Gruppenliste laden
+  --------------------------- */
 
-async function fetchGroupsFromGitHub() {
-  try {
-    const res = await fetch(GITHUB_GROUPS_URL);
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const txt = await res.text();
-    if (txt.trim().length < 3) throw new Error("Leere Datei");
-    return txt;
-  } catch (err) {
-    console.warn("GitHub Gruppenliste konnte nicht geladen werden:", err);
-    return null; // Fallback verwenden
-  }
-}
+  const GITHUB_GROUPS_URL =
+    "https://raw.githubusercontent.com/thomannpeter-ctrl/amtscup-App/main/gruppen.txt";
 
-
-/* ------------------------------------------
-   NEUE loadGroups() – alte Version löschen!
-------------------------------------------- */
-
-async function loadGroups() {
-
-  // 1) Admin-Eintrag aus localStorage?
-  const stored = localStorage.getItem("amtscupGroupsText");
-  let text = stored && stored.trim().length > 0 ? stored : null;
-
-  // 2) Wenn kein Admin-Override → GitHub versuchen
-  if (!text) {
-    const txtGitHub = await fetchGroupsFromGitHub();
-    if (txtGitHub) {
-      text = txtGitHub;
+  async function fetchGroupsFromGitHub() {
+    try {
+      const res = await fetch(GITHUB_GROUPS_URL);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const txt = await res.text();
+      if (txt.trim().length < 3) throw new Error("Leere Datei");
+      return txt;
+    } catch (err) {
+      console.warn("GitHub Gruppenliste konnte nicht geladen werden:", err);
+      return null; // Fallback verwenden
     }
   }
 
-  // 3) Fallback – Standardliste
-  if (!text) {
-    text = DEFAULT_GROUPS_TEXT;
-  }
-
-  // 4) Text in Liste umwandeln
-  groupsList = parseGroups(text);
-
-  // 5) Select-Felder füllen
-  const selects = [
-    document.getElementById("gruppe1Select"),
-    document.getElementById("gruppe2Select"),
-    document.getElementById("gruppe3Select")
+  const SPORTGERAETE = [
+    { name: "", zuschlag: 0 },
+    { name: "Standard", zuschlag: 0 },
+    { name: "Freigewehr", zuschlag: 0 },
+    { name: "Karabiner", zuschlag: 4 },
+    { name: "57/02", zuschlag: 8 },
+    { name: "57/03", zuschlag: 4 },
+    { name: "90BK", zuschlag: 4 },
+    { name: "90RK", zuschlag: 4 }
   ];
 
-  selects.forEach(select => {
-    if (!select) return;
-    select.innerHTML = "";
-    const placeholderOpt = document.createElement("option");
-    placeholderOpt.value = "";
-    placeholderOpt.textContent = "Bitte wählen …";
-    select.appendChild(placeholderOpt);
+  const DEFAULT_GROUPS_TEXT =
+`Arni FS – Gruppe 1
+Sumiswald – Elite
+Burgdorf – Gruppe Rot`;
 
-    groupsList.forEach(g => {
-      const opt = document.createElement("option");
-      opt.value = g;
-      opt.textContent = g;
-      select.appendChild(opt);
-    });
-  });
+  let submissions = [];
+  let group3Enabled = false;
+  let groupsList = [];
 
-  // 6) Admin-Textfeld aktualisieren
-  const area = document.getElementById("groupsText");
-  if (area) {
-    area.value = text;
+  function parseGroups(text) {
+    return text
+      .split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l.length > 0);
   }
 
-  updateGroupTitles();
-}
+  /* ------------------------------------------
+     NEUE loadGroups() – lädt aus:
+     1) localStorage (Admin)
+     2) GitHub (gruppen.txt)
+     3) DEFAULT_GROUPS_TEXT (Fallback)
+  ------------------------------------------- */
+  async function loadGroups() {
+    // 1) Admin-Eintrag aus localStorage?
+    const stored = localStorage.getItem("amtscupGroupsText");
+    let text = stored && stored.trim().length > 0 ? stored : null;
+
+    // 2) Wenn kein Admin-Override → GitHub versuchen
+    if (!text) {
+      const txtGitHub = await fetchGroupsFromGitHub();
+      if (txtGitHub) {
+        text = txtGitHub;
+      }
+    }
+
+    // 3) Fallback – Standardliste
+    if (!text) {
+      text = DEFAULT_GROUPS_TEXT;
+    }
+
+    // 4) Text in Liste umwandeln
+    groupsList = parseGroups(text);
+
+    // 5) Select-Felder füllen
+    const selects = [
+      document.getElementById("gruppe1Select"),
+      document.getElementById("gruppe2Select"),
+      document.getElementById("gruppe3Select")
+    ];
+
+    selects.forEach(select => {
+      if (!select) return;
+      select.innerHTML = "";
+      const placeholderOpt = document.createElement("option");
+      placeholderOpt.value = "";
+      placeholderOpt.textContent = "Bitte wählen …";
+      select.appendChild(placeholderOpt);
+
+      groupsList.forEach(g => {
+        const opt = document.createElement("option");
+        opt.value = g;
+        opt.textContent = g;
+        select.appendChild(opt);
+      });
+    });
+
+    // 6) Admin-Textfeld aktualisieren
+    const area = document.getElementById("groupsText");
+    if (area) {
+      area.value = text;
+    }
+
+    updateGroupTitles();
+  }
+
+  function getEffectiveGroupName(which) {
+    if (which === 1) {
+      const other = document.getElementById("gruppe1Other").value.trim();
+      if (other) return other;
+      const sel = document.getElementById("gruppe1Select").value.trim();
+      return sel || "";
+    } else if (which === 2) {
+      const other = document.getElementById("gruppe2Other").value.trim();
+      if (other) return other;
+      const sel = document.getElementById("gruppe2Select").value.trim();
+      return sel || "";
+    } else if (which === 3) {
+      const row = document.getElementById("gruppe3Row");
+      if (row && row.style.display === "none") return "";
+      const other = document.getElementById("gruppe3Other").value.trim();
+      if (other) return other;
+      const sel = document.getElementById("gruppe3Select").value.trim();
+      return sel || "";
+    }
+    return "";
+  }
+
+  function updateGroupTitles() {
+    const g1 = getEffectiveGroupName(1) || "Gruppe 1";
+    const g2 = getEffectiveGroupName(2) || "Gruppe 2";
+    const g3 = getEffectiveGroupName(3) || "Gruppe 3";
+    document.getElementById("gruppe1TitleLabel").textContent = g1;
+    document.getElementById("gruppe2TitleLabel").textContent = g2;
+    const t3 = document.getElementById("gruppe3TitleLabel");
+    if (t3) t3.textContent = g3;
+  }
+
+  function createGroupRows(group) {
+    const tbody = document.getElementById(
+      group === 1 ? "shootersBody1" : group === 2 ? "shootersBody2" : "shootersBody3"
+    );
+    tbody.innerHTML = "";
+    for (let i = 1; i <= 5; i++) {
+      const tr = document.createElement("tr");
+      tr.dataset.group = group;
+      tr.dataset.index = i;
+      tr.innerHTML = `
+        <td>Schütze ${i}</td>
+        <td><input type="text" class="name-input" placeholder="Name Vorname"></td>
+        <td><input type="number" class="year-input" min="1900" max="2100" placeholder="Jahrgang"></td>
+        <td>
+          <select class="geraet-select"></select>
+        </td>
+        <td><input type="number" class="result-input" min="0" placeholder="0"></td>
+        <td class="zuschlag-cell"></td>
+        <td class="total-cell"></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    tbody.querySelectorAll(".geraet-select").forEach(select => {
+      SPORTGERAETE.forEach(g => {
+        const opt = document.createElement("option");
+        opt.value = g.name;
+        opt.textContent = g.name;
+        select.appendChild(opt);
+      });
+      select.addEventListener("change", onGeraetChange);
+    });
+
+    tbody.querySelectorAll(".result-input").forEach(input => {
+      input.addEventListener("input", onResultChange);
+    });
+
+    updateTotals();
+  }
+
+  function getZuschlagForGeraet(name) {
+    const g = SPORTGERAETE.find(x => x.name === name);
+    return g ? g.zuschlag : 0;
+  }
+
+  function recalcRow(tr) {
+    const select = tr.querySelector(".geraet-select");
+    const resultInput = tr.querySelector(".result-input");
+    const zuschlagCell = tr.querySelector(".zuschlag-cell");
+    const totalCell = tr.querySelector(".total-cell");
+
+    const geraetName = select.value;
+    const resultVal = parseInt(resultInput.value, 10);
+    const res = isNaN(resultVal) ? 0 : resultVal;
+    const zuschlag = getZuschlagForGeraet(geraetName);
+
+    zuschlagCell.textContent = zuschlag ? zuschlag : "";
+    const total = res + zuschlag;
+    totalCell.textContent = (res || zuschlag) ? total : "";
+  }
+
+  function onGeraetChange(e) {
+    const tr = e.target.closest("tr");
+    recalcRow(tr);
+    updateTotals();
+  }
+
+  function onResultChange(e) {
+    const tr = e.target.closest("tr");
+    recalcRow(tr);
+    updateTotals();
+  }
+
+  function getShooterData(group) {
+    const tbody = document.getElementById(
+      group === 1 ? "shootersBody1" : group === 2 ? "shootersBody2" : "shootersBody3"
+    );
+    const rows = [];
+    tbody.querySelectorAll("tr").forEach(tr => {
+      const idx = tr.dataset.index;
+      const name = tr.querySelector(".name-input").value.trim();
+      const year = tr.querySelector(".year-input").value.trim();
+      const geraet = tr.querySelector(".geraet-select").value;
+      const result = tr.querySelector(".result-input").value.trim();
+      const zuschlag = tr.querySelector(".zuschlag-cell").textContent.trim();
+      const total = tr.querySelector(".total-cell").textContent.trim();
+      if (!name && !year && !geraet && !result && !zuschlag && !total) {
+        return;
+      }
+      rows.push({
+        index: idx,
+        name,
+        year,
+        geraet,
+        result: result || "0",
+        zuschlag: zuschlag || "0",
+        total: total || "0"
+      });
+    });
+    return rows;
+  }
+
+  function getTotalsForGroup(group) {
+    const shooters = getShooterData(group);
+    let sumR = 0, sumZ = 0, sumT = 0;
+    shooters.forEach(s => {
+      sumR += parseInt(s.result, 10) || 0;
+      sumZ += parseInt(s.zuschlag, 10) || 0;
+      sumT += parseInt(s.total, 10) || 0;
+    });
+    return { sumResult: sumR, sumZuschlag: sumZ, sumTotal: sumT };
+  }
+
+  function updateTotals() {
+    const t1 = getTotalsForGroup(1);
+    const t2 = getTotalsForGroup(2);
+    const t3 = group3Enabled ? getTotalsForGroup(3) : { sumResult: 0, sumZuschlag: 0, sumTotal: 0 };
+
+    document.getElementById("sumResult1").textContent = t1.sumResult || "";
+    document.getElementById("sumZuschlag1").textContent = t1.sumZuschlag || "";
+    document.getElementById("sumTotal1").textContent = t1.sumTotal || "";
+
+    document.getElementById("sumResult2").textContent = t2.sumResult || "";
+    document.getElementById("sumZuschlag2").textContent = t2.sumZuschlag || "";
+    document.getElementById("sumTotal2").textContent = t2.sumTotal || "";
+
+    const sr3 = document.getElementById("sumResult3");
+    if (sr3) {
+      sr3.textContent = t3.sumResult || "";
+      document.getElementById("sumZuschlag3").textContent = t3.sumZuschlag || "";
+      document.getElementById("sumTotal3").textContent = t3.sumTotal || "";
+    }
+
+    updateWinnerBox(t1.sumTotal, t2.sumTotal, t3.sumTotal);
+  }
+
+  function updateWinnerBox(total1, total2, total3) {
+    const box = document.getElementById("winnerBox");
+    box.className = "winner-box";
+
+    const g1 = getEffectiveGroupName(1) || "Gruppe 1";
+    const g2 = getEffectiveGroupName(2) || "Gruppe 2";
+    const g3Name = group3Enabled ? (getEffectiveGroupName(3) || "Gruppe 3") : "";
+
+    const totals = [];
+    if (total1) totals.push({ name: g1, total: total1, cls: "winner-g1" });
+    if (total2) totals.push({ name: g2, total: total2, cls: "winner-g2" });
+    if (group3Enabled && total3) totals.push({ name: g3Name, total: total3, cls: "winner-g3" });
+
+    if (!totals.length) {
+      box.classList.add("winner-none");
+      box.textContent = "Noch keine Resultate erfasst.";
+      return;
+    }
+
+    totals.sort((a, b) => b.total - a.total);
+    const best = totals[0];
+    const tied = totals.filter(t => t.total === best.total);
+
+    if (tied.length > 1) {
+      box.classList.add("winner-draw");
+      const names = tied.map(t => t.name).join(" / ");
+      box.textContent = "🤝 Unentschieden – " + names + " (Total " + best.total + ")";
+    } else {
+      box.classList.add(best.cls);
+      box.textContent = "🏆 Sieger: " + best.name + " (Total " + best.total + ")";
+    }
+  }
+
+  function clearErrors() {
+    document.querySelectorAll(".error").forEach(el => {
+      el.classList.remove("error");
+    });
+  }
+
+  function validateShooterRows() {
+    clearErrors();
+    let isValid = true;
+    let group1Has = false;
+    let group2Has = false;
+
+    [1, 2].forEach(group => {
+      const tbody = document.getElementById(
+        group === 1 ? "shootersBody1" : group === 2 ? "shootersBody2" : "shootersBody3"
+      );
+      tbody.querySelectorAll("tr").forEach(tr => {
+        const nameInput = tr.querySelector(".name-input");
+        const yearInput = tr.querySelector(".year-input");
+        const geraetSelect = tr.querySelector(".geraet-select");
+        const resultInput = tr.querySelector(".result-input");
+
+        const name = nameInput.value.trim();
+        const year = yearInput.value.trim();
+        const geraet = geraetSelect.value.trim();
+        const result = resultInput.value.trim();
+
+        const anyFilled = name || year || geraet || result;
+        if (!anyFilled) {
+          return;
+        }
+
+        if (group === 1) group1Has = true; else if (group === 2) group2Has = true;
+
+        if (!name) { nameInput.classList.add("error"); isValid = false; }
+        if (!year) { yearInput.classList.add("error"); isValid = false; }
+        if (!geraet) { geraetSelect.classList.add("error"); isValid = false; }
+        if (!result) { resultInput.classList.add("error"); isValid = false; }
+      });
+    });
+
+    if (!group1Has) {
+      alert("Bitte in Gruppe 1 mindestens einen Schützen mit Daten erfassen.");
+      return false;
+    }
+
+    if (!isValid) {
+      alert("Bitte alle Pflichtfelder (Name, Jahrgang, Sportgerät, Resultat) für erfasste Schützen ausfüllen.");
+      return false;
+    }
+
+    return true;
+  }
+
+  function exportToExcel() {
+    if (!validateShooterRows()) return;
+
+    const chefName = document.getElementById("chefName").value || "";
+    const chefEmail = document.getElementById("chefEmail").value || "";
+    const group1Name = getEffectiveGroupName(1);
+    const group2Name = getEffectiveGroupName(2);
+    const group3Name = getEffectiveGroupName(3);
+
+    const shooters1 = getShooterData(1);
+    const shooters2 = getShooterData(2);
+    const shooters3 = group3Enabled ? getShooterData(3) : [];
+    const t1 = getTotalsForGroup(1);
+    const t2 = getTotalsForGroup(2);
+    const t3 = group3Enabled && shooters3.length ? getTotalsForGroup(3) : { sumResult: 0, sumZuschlag: 0, sumTotal: 0 };
+
+    const data = [];
+    data.push(["Amtscup Cup-Duell – Resultatmeldung"]);
+    data.push([]);
+    data.push(["Gruppenchef:", chefName, "E-Mail:", chefEmail]);
+    data.push(["Gruppe 1:", group1Name]);
+    data.push(["Gruppe 2:", group2Name]);
+    if (group3Name) data.push(["Gruppe 3:", group3Name]);
+    data.push([]);
+
+    data.push(["Gruppe 1 – Schützen"]);
+    data.push(["Schütze", "Name", "Jahrgang", "Sportgerät", "Resultat", "Zuschlag", "Total"]);
+    shooters1.forEach(s => {
+      data.push([
+        "Schütze " + s.index,
+        s.name,
+        s.year,
+        s.geraet,
+        s.result,
+        s.zuschlag,
+        s.total
+      ]);
+    });
+    data.push(["Summen Gruppe 1", "", "", "", t1.sumResult, t1.sumZuschlag, t1.sumTotal]);
+    data.push([]);
+
+    if (shooters2.length) {
+      data.push(["Gruppe 2 – Schützen"]);
+      data.push(["Schütze", "Name", "Jahrgang", "Sportgerät", "Resultat", "Zuschlag", "Total"]);
+      shooters2.forEach(s => {
+        data.push([
+          "Schütze " + s.index,
+          s.name,
+          s.year,
+          s.geraet,
+          s.result,
+          s.zuschlag,
+          s.total
+        ]);
+      });
+      data.push(["Summen Gruppe 2", "", "", "", t2.sumResult, t2.sumZuschlag, t2.sumTotal]);
+      data.push([]);
+    }
+
+    if (group3Enabled && shooters3.length) {
+      data.push(["Gruppe 3 – Schützen"]);
+      data.push(["Schütze", "Name", "Jahrgang", "Sportgerät", "Resultat", "Zuschlag", "Total"]);
+      shooters3.forEach(s => {
+        data.push([
+          "Schütze " + s.index,
+          s.name,
+          s.year,
+          s.geraet,
+          s.result,
+          s.zuschlag,
+          s.total
+        ]);
+      });
+      data.push(["Summen Gruppe 3", "", "", "", t3.sumResult, t3.sumZuschlag, t3.sumTotal]);
+      data.push([]);
+    }
+
+    const winnerText = getWinnerText(t1.sumTotal, t2.sumTotal, t3.sumTotal, group1Name, group2Name, group3Name);
+    data.push(["Sieger:", winnerText]);
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Cup-Duell");
+
+    const safeName = (group1Name + "_vs_" + group2Name).replace(/\s+/g, "_");
+    XLSX.writeFile(wb, "Amtscup_CupDuell_" + safeName + ".xlsx");
+  }
+
+  function getWinnerText(total1, total2, total3, g1, g2, g3) {
+    const entries = [];
+    const name1 = g1 || "Gruppe 1";
+    const name2 = g2 || "Gruppe 2";
+    if (total1) entries.push({ name: name1, total: total1 });
+    if (total2) entries.push({ name: name2, total: total2 });
+    if (group3Enabled && total3) entries.push({ name: g3 || "Gruppe 3", total: total3 });
+
+    if (!entries.length) return "Noch keine Resultate";
+
+    entries.sort((a, b) => b.total - a.total);
+    const best = entries[0];
+    const tied = entries.filter(e => e.total === best.total);
+    if (tied.length > 1) {
+      const names = tied.map(e => e.name).join(" / ");
+      return "Unentschieden: " + names + " (Total " + best.total + ")";
+    }
+    return best.name + " (Total " + best.total + ")";
+  }
+
+  function saveSubmissionLocally(meta) {
+    const stamp = new Date();
+    const sub = {
+      time: stamp.toLocaleString(),
+      gruppe1: meta.group1Name,
+      gruppe2: meta.group2Name,
+      gruppe3: meta.group3Name,
+      winner: meta.winnerText
+    };
+    submissions.push(sub);
+    localStorage.setItem("amtscupCupMeldungen", JSON.stringify(submissions));
+    renderSubmissions();
+  }
+
+  function renderSubmissions() {
+    const tbody = document.querySelector("#submissionsTable tbody");
+    tbody.innerHTML = "";
+    submissions.forEach((s, idx) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${idx + 1}</td>
+        <td>${s.time}</td>
+        <td>${s.gruppe1}</td>
+        <td>${s.gruppe2}</td>
+        <td>${s.gruppe3 || ""}</td>
+        <td>${s.winner}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function loadSubmissions() {
+    const stored = localStorage.getItem("amtscupCupMeldungen");
+    if (stored) {
+      try {
+        submissions = JSON.parse(stored) || [];
+      } catch (e) {
+        submissions = [];
+      }
+    }
+    renderSubmissions();
+  }
+
+  function buildEmailAndSend() {
+    if (!validateShooterRows()) return;
+
+    const chefName = document.getElementById("chefName").value.trim();
+    const chefEmail = document.getElementById("chefEmail").value.trim();
+    const group1Name = getEffectiveGroupName(1);
+    const group2Name = getEffectiveGroupName(2);
+    const group3Name = getEffectiveGroupName(3);
+
+    if (!chefName || !chefEmail || !group1Name) {
+      alert("Bitte Gruppenchef (Name & E-Mail) und mindestens Gruppe 1 auswählen/angeben.");
+      return;
+    }
+
+    const shooters1 = getShooterData(1);
+    const shooters2 = getShooterData(2);
+    const shooters3 = group3Enabled ? getShooterData(3) : [];
+    const t1 = getTotalsForGroup(1);
+    const t2 = getTotalsForGroup(2);
+    const t3 = group3Enabled && shooters3.length ? getTotalsForGroup(3) : { sumResult: 0, sumZuschlag: 0, sumTotal: 0 };
+
+    const imageInput = document.getElementById("imageUpload");
+    const imageFile = imageInput.files[0];
+    const imageInfo = imageFile ? imageFile.name : "kein Bild ausgewählt";
+
+    const winnerText = getWinnerText(t1.sumTotal, t2.sumTotal, t3.sumTotal, group1Name, group2Name, group3Name);
+    const meta = { group1Name, group2Name, group3Name, winnerText };
+    saveSubmissionLocally(meta);
+
+    let body = "";
+    body += "Amtscup Cup-Duell – Resultatmeldung\n";
+    body += "\nGruppenchef: " + chefName;
+    body += "\nE-Mail Gruppenchef: " + chefEmail;
+    body += "\nGruppe 1: " + group1Name;
+    if (group2Name) body += "\nGruppe 2: " + group2Name;
+    if (group3Name) body += "\nGruppe 3: " + group3Name;
+    body += "\n\nGruppe 1 – Schützen:\n";
+    body += "Schütze;Name;Jahrgang;Sportgerät;Resultat;Zuschlag;Total\n";
+    shooters1.forEach(s => {
+      body += [
+        "Schütze " + s.index,
+        s.name || "-",
+        s.year || "-",
+        s.geraet || "-",
+        s.result || "0",
+        s.zuschlag || "0",
+        s.total || "0"
+      ].join(";") + "\n";
+    });
+    body += "Summen Gruppe 1: Resultat=" + t1.sumResult + "; Zuschlag=" + t1.sumZuschlag + "; Total=" + t1.sumTotal + "\n";
+
+    body += "\nGruppe 2 – Schützen:\n";
+    body += "Schütze;Name;Jahrgang;Sportgerät;Resultat;Zuschlag;Total\n";
+    shooters2.forEach(s => {
+      body += [
+        "Schütze " + s.index,
+        s.name || "-",
+        s.year || "-",
+        s.geraet || "-",
+        s.result || "0",
+        s.zuschlag || "0",
+        s.total || "0"
+      ].join(";") + "\n";
+    });
+    body += "Summen Gruppe 2: Resultat=" + t2.sumResult + "; Zuschlag=" + t2.sumZuschlag + "; Total=" + t2.sumTotal + "\n";
+
+    if (group3Enabled && shooters3.length) {
+      body += "\nGruppe 3 – Schützen:\n";
+      body += "Schütze;Name;Jahrgang;Sportgerät;Resultat;Zuschlag;Total\n";
+      shooters3.forEach(s => {
+        body += [
+          "Schütze " + s.index,
+          s.name || "-",
+          s.year || "-",
+          s.geraet || "-",
+          s.result || "0",
+          s.zuschlag || "0",
+          s.total || "0"
+        ].join(";") + "\n";
+      });
+      body += "Summen Gruppe 3: Resultat=" + t3.sumResult + "; Zuschlag=" + t3.sumZuschlag + "; Total=" + t3.sumTotal + "\n";
+    }
+
+    body += "\nSieger: " + winnerText + "\n";
+    body += "Bild (bitte im Mailprogramm manuell anhängen): " + imageInfo;
+    body += "\n\nGesendet am: " + new Date().toLocaleString();
+
+    const subject = "Amtscup Cup-Duell – " + group1Name + " vs. " + group2Name;
+    const mailto = "mailto:" + encodeURIComponent(RESULT_EMAIL)
+      + "?subject=" + encodeURIComponent(subject)
+      + "&body=" + encodeURIComponent(body);
+
+    window.location.href = mailto;
+  }
+
+  function setupImagePreview() {
+    const input = document.getElementById("imageUpload");
+    const preview = document.getElementById("imagePreview");
+    input.addEventListener("change", () => {
+      const file = input.files[0];
+      if (!file) {
+        preview.style.display = "none";
+        preview.src = "";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.src = e.target.result;
+        preview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function setupAdmin() {
+    const loginBtn = document.getElementById("adminLoginBtn");
+    const adminArea = document.getElementById("adminArea");
+    const locked = document.getElementById("adminLocked");
+    const passwordInput = document.getElementById("adminPassword");
+
+    loginBtn.addEventListener("click", () => {
+      const val = passwordInput.value;
+      if (val === ADMIN_PASSWORD) {
+        locked.style.display = "none";
+        adminArea.style.display = "block";
+      } else {
+        alert("Falsches Passwort.");
+      }
+    });
+
+    document.getElementById("saveGroupsBtn").addEventListener("click", () => {
+      const text = document.getElementById("groupsText").value || "";
+      localStorage.setItem("amtscupGroupsText", text);
+      loadGroups();
+      alert("Gruppen/Vereine gespeichert.");
+    });
+
+    document.getElementById("resetGroupsBtn").addEventListener("click", () => {
+      localStorage.removeItem("amtscupGroupsText");
+      document.getElementById("groupsText").value = DEFAULT_GROUPS_TEXT;
+      loadGroups();
+      alert("Standardliste wiederhergestellt.");
+    });
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    createGroupRows(1);
+    createGroupRows(2);
+    // Gruppe 3 wird erst bei Bedarf aufgebaut
+    setupImagePreview();
+    loadSubmissions();
+    loadGroups(); // jetzt async, aber Aufruf bleibt gleich
+    setupAdmin();
+
+    document.getElementById("exportBtn").addEventListener("click", exportToExcel);
+    document.getElementById("sendBtn").addEventListener("click", buildEmailAndSend);
+
+    document.getElementById("gruppe1Select").addEventListener("change", () => {
+      updateGroupTitles();
+    });
+    document.getElementById("gruppe2Select").addEventListener("change", () => {
+      updateGroupTitles();
+    });
+    document.getElementById("gruppe1Other").addEventListener("input", updateGroupTitles);
+    document.getElementById("gruppe2Other").addEventListener("input", updateGroupTitles);
+
+    const addBtn3 = document.getElementById("addGroup3Btn");
+    const row3 = document.getElementById("gruppe3Row");
+    const card3 = document.getElementById("gruppe3Card");
+    if (addBtn3 && row3 && card3) {
+      addBtn3.addEventListener("click", () => {
+        if (!group3Enabled) {
+          group3Enabled = true;
+          row3.style.display = "flex";
+          card3.style.display = "block";
+          createGroupRows(3);
+          loadGroups();
+          addBtn3.textContent = "3. Gruppe entfernen";
+        } else {
+          if (!confirm("3. Gruppe und alle erfassten Daten wirklich entfernen?")) return;
+          group3Enabled = false;
+          row3.style.display = "none";
+          card3.style.display = "none";
+          document.getElementById("gruppe3Other").value = "";
+          document.getElementById("gruppe3Select").value = "";
+          const tbody3 = document.getElementById("shootersBody3");
+          if (tbody3) tbody3.innerHTML = "";
+          document.getElementById("sumResult3").textContent = "";
+          document.getElementById("sumZuschlag3").textContent = "";
+          document.getElementById("sumTotal3").textContent = "";
+          addBtn3.textContent = "➕ 3. Gruppe hinzufügen (optional)";
+          updateTotals();
+        }
+        updateGroupTitles();
+      });
+    }
+
+    const g3Select = document.getElementById("gruppe3Select");
+    const g3Other = document.getElementById("gruppe3Other");
+    if (g3Select) g3Select.addEventListener("change", updateGroupTitles);
+    if (g3Other) g3Other.addEventListener("input", updateGroupTitles);
+  });
+</script>
