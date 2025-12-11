@@ -1,303 +1,78 @@
-<!doctype html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>Amtscup – Gruppenmeldung</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+/* ---------------------------  
+   GitHub Gruppenliste laden  
+--------------------------- */
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #eef2f7;
-      padding: 20px;
+const GITHUB_GROUPS_URL =
+  "https://raw.githubusercontent.com/thomannpeter-ctrl/amtscup-App/main/gruppen.txt";
+
+async function fetchGroupsFromGitHub() {
+  try {
+    const res = await fetch(GITHUB_GROUPS_URL);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const txt = await res.text();
+    if (txt.trim().length < 3) throw new Error("Leere Datei");
+    return txt;
+  } catch (err) {
+    console.warn("GitHub Gruppenliste konnte nicht geladen werden:", err);
+    return null; // Fallback verwenden
+  }
+}
+
+
+/* ------------------------------------------
+   NEUE loadGroups() – alte Version löschen!
+------------------------------------------- */
+
+async function loadGroups() {
+
+  // 1) Admin-Eintrag aus localStorage?
+  const stored = localStorage.getItem("amtscupGroupsText");
+  let text = stored && stored.trim().length > 0 ? stored : null;
+
+  // 2) Wenn kein Admin-Override → GitHub versuchen
+  if (!text) {
+    const txtGitHub = await fetchGroupsFromGitHub();
+    if (txtGitHub) {
+      text = txtGitHub;
     }
-    .card {
-      background: #fff;
-      padding: 18px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      margin-top: 0;
-    }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 4px;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-    }
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 6px;
-      text-align: left;
-    }
-    th {
-      background: #f3f3f3;
-    }
-    .total {
-      font-weight: bold;
-      color: #0055cc;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>Amtscup – Gruppenmeldung</h1>
+  }
 
-    <label for="chefName">Name Gruppenchef</label>
-    <input id="chefName" type="text" placeholder="Name Vorname">
+  // 3) Fallback – Standardliste
+  if (!text) {
+    text = DEFAULT_GROUPS_TEXT;
+  }
 
-    <label for="chefEmail">E-Mail</label>
-    <input id="chefEmail" type="email" placeholder="name@verein.ch">
+  // 4) Text in Liste umwandeln
+  groupsList = parseGroups(text);
 
-    <h3>Gruppe 1</h3>
-    <select id="gruppe1Select"></select>
-    <input id="gruppe1Other" type="text" placeholder="Falls nicht in Liste">
+  // 5) Select-Felder füllen
+  const selects = [
+    document.getElementById("gruppe1Select"),
+    document.getElementById("gruppe2Select"),
+    document.getElementById("gruppe3Select")
+  ];
 
-    <h3>Gruppe 2</h3>
-    <select id="gruppe2Select"></select>
-    <input id="gruppe2Other" type="text" placeholder="Falls nicht in Liste">
+  selects.forEach(select => {
+    if (!select) return;
+    select.innerHTML = "";
+    const placeholderOpt = document.createElement("option");
+    placeholderOpt.value = "";
+    placeholderOpt.textContent = "Bitte wählen …";
+    select.appendChild(placeholderOpt);
 
-    <h3>Gruppe 3 (optional)</h3>
-    <select id="gruppe3Select"></select>
-    <input id="gruppe3Other" type="text" placeholder="Falls nicht in Liste">
-  </div>
+    groupsList.forEach(g => {
+      const opt = document.createElement("option");
+      opt.value = g;
+      opt.textContent = g;
+      select.appendChild(opt);
+    });
+  });
 
-  <div class="card">
-    <h2 id="g1Title">Schützen & Resultate – Gruppe 1</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Schütze</th>
-          <th>Name</th>
-          <th>Jahrgang</th>
-          <th>Gerät</th>
-          <th>Resultat</th>
-          <th>Zuschlag</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody id="g1Table"></tbody>
-      <tfoot>
-        <tr>
-          <td colspan="4"></td>
-          <td class="total" id="g1SumR">0</td>
-          <td class="total" id="g1SumB">0</td>
-          <td class="total" id="g1SumT">0</td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
+  // 6) Admin-Textfeld aktualisieren
+  const area = document.getElementById("groupsText");
+  if (area) {
+    area.value = text;
+  }
 
-  <div class="card">
-    <h2 id="g2Title">Schützen & Resultate – Gruppe 2</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Schütze</th>
-          <th>Name</th>
-          <th>Jahrgang</th>
-          <th>Gerät</th>
-          <th>Resultat</th>
-          <th>Zuschlag</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody id="g2Table"></tbody>
-      <tfoot>
-        <tr>
-          <td colspan="4"></td>
-          <td class="total" id="g2SumR">0</td>
-          <td class="total" id="g2SumB">0</td>
-          <td class="total" id="g2SumT">0</td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <div class="card">
-    <h2 id="g3Title">Schützen & Resultate – Gruppe 3</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Schütze</th>
-          <th>Name</th>
-          <th>Jahrgang</th>
-          <th>Gerät</th>
-          <th>Resultat</th>
-          <th>Zuschlag</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody id="g3Table"></tbody>
-      <tfoot>
-        <tr>
-          <td colspan="4"></td>
-          <td class="total" id="g3SumR">0</td>
-          <td class="total" id="g3SumB">0</td>
-          <td class="total" id="g3SumT">0</td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <div class="card">
-    <h2>Vergleich</h2>
-    <table>
-      <tr>
-        <td id="c1Name">Gruppe 1</td>
-        <td class="total" id="c1Val">0</td>
-      </tr>
-      <tr>
-        <td id="c2Name">Gruppe 2</td>
-        <td class="total" id="c2Val">0</td>
-      </tr>
-      <tr>
-        <td id="c3Name">Gruppe 3</td>
-        <td class="total" id="c3Val">0</td>
-      </tr>
-    </table>
-  </div>
-
-  <div class="card">
-    <h3>Admin – Gruppenliste</h3>
-    <textarea id="groupsText" readonly></textarea>
-  </div>
-
-  <script>
-    // ----------------------------
-    // Gruppen aus gruppen.txt laden
-    // ----------------------------
-    async function loadGroups() {
-      const selects = [
-        document.getElementById("gruppe1Select"),
-        document.getElementById("gruppe2Select"),
-        document.getElementById("gruppe3Select")
-      ];
-
-      selects.forEach(s => {
-        s.innerHTML = "<option value=''>Bitte wählen …</option>";
-      });
-
-      try {
-        // WICHTIG: gruppen.txt liegt im gleichen Ordner wie index.html
-        const response = await fetch("gruppen.txt");
-        const text = await response.text();
-
-        document.getElementById("groupsText").value = text;
-
-        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-
-        lines.forEach(line => {
-          selects.forEach(sel => {
-            const opt = document.createElement("option");
-            opt.textContent = line;
-            opt.value = line;
-            sel.appendChild(opt);
-          });
-        });
-
-      } catch (e) {
-        alert("Fehler beim Laden der Gruppenliste: " + e);
-      }
-    }
-
-    // ----------------------------
-    // Schützen-Tabelle
-    // ----------------------------
-    const sportgeräte = [
-      { name: "Stgw57", bonus: 0 },
-      { name: "Stgw90", bonus: 0 },
-      { name: "Pistole 25m", bonus: 0 },
-      { name: "Pistole 50m", bonus: 0 },
-      { name: "Auflage", bonus: -5 },
-      { name: "Junior", bonus: 5 }
-    ];
-
-    function createTableRows(tbodyId) {
-      const tbody = document.getElementById(tbodyId);
-      tbody.innerHTML = "";
-
-      for (let i = 1; i <= 5; i++) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>Schütze ${i}</td>
-          <td><input></td>
-          <td><input></td>
-          <td>
-            <select>
-              <option value="">Bitte wählen</option>
-              ${sportgeräte.map(s => `<option data-bonus="${s.bonus}" value="${s.name}">${s.name}</option>`).join("")}
-            </select>
-          </td>
-          <td><input class="res" type="number"></td>
-          <td class="bonus">0</td>
-          <td class="total">0</td>
-        `;
-        tbody.appendChild(tr);
-      }
-    }
-
-    function calcTotals(tbodyId, sumR, sumB, sumT) {
-      const rows = document.querySelectorAll(`#${tbodyId} tr`);
-      let R = 0, B = 0, T = 0;
-
-      rows.forEach(r => {
-        const result = parseFloat(r.querySelector(".res").value) || 0;
-        const bonus = parseFloat(r.querySelector("select").selectedOptions[0].dataset.bonus || 0);
-        const total = result + bonus;
-
-        r.querySelector(".bonus").textContent = bonus;
-        r.querySelector(".total").textContent = total;
-
-        R += result;
-        B += bonus;
-        T += total;
-      });
-
-      document.getElementById(sumR).textContent = R;
-      document.getElementById(sumB).textContent = B;
-      document.getElementById(sumT).textContent = T;
-
-      updateComparison();
-    }
-
-    function updateComparison() {
-      document.getElementById("c1Val").textContent = document.getElementById("g1SumT").textContent;
-      document.getElementById("c2Val").textContent = document.getElementById("g2SumT").textContent;
-      document.getElementById("c3Val").textContent = document.getElementById("g3SumT").textContent;
-
-      document.getElementById("c1Name").textContent = document.getElementById("gruppe1Select").value || "Gruppe 1";
-      document.getElementById("c2Name").textContent = document.getElementById("gruppe2Select").value || "Gruppe 2";
-      document.getElementById("c3Name").textContent = document.getElementById("gruppe3Select").value || "Gruppe 3";
-    }
-
-    // Init
-    window.onload = () => {
-      loadGroups();
-
-      createTableRows("g1Table");
-      createTableRows("g2Table");
-      createTableRows("g3Table");
-
-      setInterval(() => {
-        calcTotals("g1Table", "g1SumR", "g1SumB", "g1SumT");
-        calcTotals("g2Table", "g2SumR", "g2SumB", "g2SumT");
-        calcTotals("g3Table", "g3SumR", "g3SumB", "g3SumT");
-      }, 200);
-    };
-  </script>
-</body>
-</html>
+  updateGroupTitles();
+}
