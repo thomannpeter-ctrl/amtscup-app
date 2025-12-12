@@ -6,34 +6,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-*{box-sizing:border-box}
-body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#eef2f7;color:#111827}
+body{font-family:system-ui;background:#eef2f7;margin:0}
 .container{max-width:1100px;margin:auto;padding:1rem}
-h1{color:#1e3a8a;margin-bottom:.5rem}
-h2{color:#1d4ed8;margin:.5rem 0}
-.card{background:#fff;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;box-shadow:0 4px 10px rgba(15,23,42,.08)}
-.row{display:flex;gap:.75rem;flex-wrap:wrap}
-.field{flex:1;min-width:200px}
-label{font-size:.8rem;font-weight:600;color:#4b5563}
-input,select,textarea{width:100%;padding:.45rem .55rem;border-radius:8px;border:1px solid #cbd5f5;background:#f9fafb}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#2563eb;background:#fff}
-table{width:100%;border-collapse:collapse;font-size:.85rem}
-th,td{border:1px solid #e5e7eb;padding:.35rem;text-align:center}
+.card{background:#fff;border-radius:12px;padding:1rem;margin-bottom:1rem;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+h1{color:#1e3a8a}
+h2{color:#1d4ed8}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ddd;padding:.4rem;text-align:center}
 th{background:#dbeafe}
-td input,td select{border:none;background:transparent;width:100%}
-.sum-cell{background:#f3f4f6;font-weight:700}
-.group-title{font-weight:700;margin:.25rem 0}
-button{border:none;border-radius:999px;padding:.45rem .95rem;font-size:.85rem;cursor:pointer}
-.btn-primary{background:#2563eb;color:#fff}
-.btn-secondary{background:#e5e7eb}
-.winner-box{margin-top:.5rem;padding:.6rem .8rem;border-radius:999px;font-weight:700}
-.winner-none{background:#e5e7eb}
-.winner-g1{background:#dcfce7}
-.winner-g2{background:#dbeafe}
-.winner-draw{background:#fef9c3}
-.preview-img{max-width:200px;max-height:150px;border-radius:8px;border:1px solid #e5e7eb;display:none;margin-top:.5rem}
-.error{border-color:#dc2626!important;background:#fee2e2!important}
-@media(max-width:640px){table{font-size:.75rem}}
+input,select,textarea{width:100%;padding:.4rem}
+button{padding:.4rem .9rem;border:none;border-radius:20px;cursor:pointer}
+.btn{background:#2563eb;color:#fff}
+.sum{background:#f3f4f6;font-weight:700}
+.winner{padding:.6rem;border-radius:20px;font-weight:700}
+.w-none{background:#e5e7eb}
+.w-1{background:#dcfce7}
+.w-2{background:#dbeafe}
+.preview{max-width:200px;display:none;margin-top:.5rem}
 </style>
 </head>
 
@@ -42,56 +31,124 @@ button{border:none;border-radius:999px;padding:.45rem .95rem;font-size:.85rem;cu
 
 <h1>Amtscup – Cup-Duell</h1>
 
-<!-- 1 Gruppen -->
 <div class="card">
 <h2>1. Gruppenchef & Gruppen</h2>
-<div class="row">
-  <div class="field">
-    <label>Name Gruppenchef</label>
-    <input id="chefName">
-  </div>
-  <div class="field">
-    <label>E-Mail Gruppenchef</label>
-    <input id="chefEmail" type="email">
-  </div>
+<input id="chefName" placeholder="Name Gruppenchef"><br><br>
+<input id="chefMail" placeholder="E-Mail Gruppenchef"><br><br>
+<select id="g1"></select>
+<input id="g1o" placeholder="Andere Gruppe 1"><br><br>
+<select id="g2"></select>
+<input id="g2o" placeholder="Andere Gruppe 2">
 </div>
 
-<div class="row">
-  <div class="field">
-    <label>Gruppe 1</label>
-    <select id="gruppe1Select"></select>
-  </div>
-  <div class="field">
-    <label>Andere Gruppe 1</label>
-    <input id="gruppe1Other">
-  </div>
-</div>
-
-<div class="row">
-  <div class="field">
-    <label>Gruppe 2</label>
-    <select id="gruppe2Select"></select>
-  </div>
-  <div class="field">
-    <label>Andere Gruppe 2</label>
-    <input id="gruppe2Other">
-  </div>
-</div>
-</div>
-
-<!-- 2 Schützen -->
 <div class="card">
 <h2>2. Schützen & Resultate</h2>
-<div class="group-title" id="g1Title">Gruppe 1</div>
+
+<h3 id="t1">Gruppe 1</h3>
 <table>
-<thead>
-<tr><th>#</th><th>Name</th><th>Resultat</th></tr>
-</thead>
-<tbody id="body1"></tbody>
-<tfoot>
-<tr><th colspan="2">Summe</th><th id="sum1" class="sum-cell"></th></tr>
-</tfoot>
+<thead><tr><th>#</th><th>Name</th><th>Resultat</th></tr></thead>
+<tbody id="b1"></tbody>
+<tfoot><tr><td colspan="2">Summe</td><td id="s1" class="sum"></td></tr></tfoot>
 </table>
 
-<div class="group-title" id="g2Title">Gruppe 2</div>
-<
+<h3 id="t2">Gruppe 2</h3>
+<table>
+<thead><tr><th>#</th><th>Name</th><th>Resultat</th></tr></thead>
+<tbody id="b2"></tbody>
+<tfoot><tr><td colspan="2">Summe</td><td id="s2" class="sum"></td></tr></tfoot>
+</table>
+</div>
+
+<div class="card">
+<h2>3. Sieger</h2>
+<div id="winner" class="winner w-none">Noch keine Resultate</div>
+</div>
+
+<div class="card">
+<h2>4. Bild oder PDF hochladen</h2>
+<input type="file" id="file" accept="image/*,.pdf">
+<img id="img" class="preview">
+</div>
+
+<div class="card">
+<h2>Admin – Gruppen / Vereine</h2>
+<div id="lock">
+<input type="password" id="pw" placeholder="Admin-Passwort">
+<button class="btn" id="login">Admin öffnen</button>
+</div>
+<div id="admin" style="display:none">
+<textarea id="groups" rows="5"></textarea><br>
+<button class="btn" id="save">Speichern</button>
+</div>
+</div>
+
+</div>
+
+<script>
+/* Passwort: Leona/3006/2021 */
+const pw=[76,101,111,110,97,47,51,48,48,54,47,50,48,50,49];
+const check=p=>p.split("").map(c=>c.charCodeAt(0)).every((c,i)=>c===pw[i]);
+
+const DEF=`Arni FS – Gruppe 1
+Sumiswald – Elite
+Burgdorf – Gruppe Rot`;
+
+const g1=document.getElementById("g1"),g2=document.getElementById("g2");
+const b1=document.getElementById("b1"),b2=document.getElementById("b2");
+const s1=document.getElementById("s1"),s2=document.getElementById("s2");
+const win=document.getElementById("winner");
+
+function rows(b){
+ b.innerHTML="";
+ for(let i=1;i<=5;i++){
+  b.innerHTML+=`<tr><td>${i}</td><td><input></td><td><input type="number" min="0"></td></tr>`;
+ }
+}
+
+function load(){
+ const txt=localStorage.getItem("groups")||DEF;
+ document.getElementById("groups").value=txt;
+ [g1,g2].forEach(s=>{
+  s.innerHTML="<option></option>";
+  txt.split(/\n/).forEach(l=>s.innerHTML+=`<option>${l}</option>`);
+ });
+}
+
+function sum(b){
+ let t=0;b.querySelectorAll("input[type=number]").forEach(i=>t+=Number(i.value)||0);
+ return t;
+}
+
+function update(){
+ document.getElementById("t1").textContent=g1.value||"Gruppe 1";
+ document.getElementById("t2").textContent=g2.value||"Gruppe 2";
+ const a=sum(b1),c=sum(b2);
+ s1.textContent=a||"";s2.textContent=c||"";
+ if(!a&&!c){win.textContent="Noch keine Resultate";win.className="winner w-none";}
+ else if(a===c){win.textContent="Unentschieden";win.className="winner w-none";}
+ else if(a>c){win.textContent="🏆 Sieger: "+(g1.value||"Gruppe 1");win.className="winner w-1";}
+ else{win.textContent="🏆 Sieger: "+(g2.value||"Gruppe 2");win.className="winner w-2";}
+}
+
+document.addEventListener("input",update);
+
+document.getElementById("file").onchange=e=>{
+ const f=e.target.files[0];
+ if(f&&f.type.startsWith("image/")){
+  const r=new FileReader();
+  r.onload=x=>{img.src=x.target.result;img.style.display="block"};
+  r.readAsDataURL(f);
+ }
+};
+
+login.onclick=()=>{
+ if(check(pw.value)){lock.style.display="none";admin.style.display="block";}
+ else alert("Falsches Passwort");
+};
+
+save.onclick=()=>{localStorage.setItem("groups",groups.value);load();};
+
+rows(b1);rows(b2);load();update();
+</script>
+</body>
+</html>
