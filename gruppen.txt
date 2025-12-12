@@ -1,18 +1,64 @@
-1 Heim	1	P014	Steffisburg PS	Schnittweier
-1 Gast	1	P001	Biglen PS	Shooters
-2 Heim	1	P002	Konolfingen PS	Ballenbühl
-2 Gast	1	P012	Münsingen PS	Bahnhof
-3 Heim	1	P008	Linden PS	Knaller
-3 Gast	1	P018	Zäziwil- Gr'h'st. PS	Krone
-4 Heim	1	P017	Zäziwil- Gr'h'st. PS	Die Daltons
-4 Gast	1	P009	Linden PS	Pistoleros
-5 Heim	1	P015	Wichtrach-Tahlgut PS	Hecht
-5 Gast	1	P005	Konolfingen PS	Locher
-6 Heim	1	P007	Linden PS	GmbH
-6 Gast	1	P016	Zäziwil- Gr'h'st. PS	Buhlenberg
-7 Heim	1	P006	Linden PS	9mm
-7 Gast	1	P004	Konolfingen PS	Inseli
-8 Heim	1	P011	Münsingen PS	Aare
-8 Gast	1	P013	Steffisburg PS	Moos
-9 Heim	1	P010	Linden PS	Visier
-9 Gast	1	P003	Konolfingen PS	Grube
+1 Heim	A004	Allmendingen FS	Chlepfcheibe
+1 Gast	A018	Gysenstein FS	Amboss
+2 Heim	A036	Linden FS	Alfa Romeo
+2 Gast	A005	Allmendingen FS	Warts APP
+3 Heim	A053	Schützen Grosshöchstetten	Blitz
+3 Gast	A051	Richigen FS	Benchen
+4 Heim	A067	Wichtrach Schützen	Talbächli
+4 Gast	A019	Gysenstein FS	Ballenbühl
+5 Heim	A048	Oberthal MS	Kapfwald
+5 Gast	A070	Worber Sportschützen	Granate
+6 Heim	A011	Bowil MS	A- Team
+6 Gast	A017	Falkenfluh-Schützen	Wagenheber
+7 Heim	A057	Sportschützen Furth	Pflümli
+7 Gast	A012	Bowil MS	Dürrbach
+8 Heim	A063	Trimstein Eichi FS	Jägermeister
+8 Gast	A032	Kratzmattschützen	Beginners
+9 Heim	A033	Kratzmattschützen	Chäsrauft
+9 Gast	A009	Biglen FS	Power
+10 Heim	A069	Wichtrach Schützen	Top- Gun
+10 Gast	A008	Arni FS	Rotiholz
+11 Heim	A014	Falkenfluh-Schützen	Alt u. Jung
+11 Gast	A038	Linden FS	Kurzenberg
+12 Heim	A003	Aareschützen Kiesen Oppligen	Stockhorn
+12 Gast	A025	Häutligen FS	Wolfmatt
+13 Heim	A024	Häutligen FS	Gantrisch
+13 Gast	A055	Schützen Grosshöchstetten	Waldrand
+14 Heim	A065	Trimstein Eichi FS	Sius
+14 Gast	A034	Kratzmattschützen	Elenor
+15 Heim	A058	Sportschützen Furth	Speher
+15 Gast	A029	Konolfingen SG	Galgenhoger
+16 Heim	A026	Konolfingen SG	Chläbi
+16 Gast	A066	Trimstein Eichi FS	Tele- Tell
+17 Heim	A016	Falkenfluh-Schützen	Feuerstein
+17 Gast	A041	Oberdiessbach SG	Ganztal
+18 Heim	A047	Oberthal MS	Hasechlupf
+18 Gast	A068	Wichtrach Schützen	Luchs
+19 Heim	A060	Sportschützen Münsingen	Zentrum
+19 Gast	A007	Arni FS	Gunners
+20 Heim	A046	Oberthal MS	Guggiwäudli
+20 Gast	A035	Kratzmattschützen	Schützenbrüder
+21 Heim	A022	Häutligen FS	Buchholz
+21 Gast	A044	Oberthal MS	Blasenfluh
+22 Heim	A052	Richigen FS	TEAM CRAFT
+22 Gast	A037	Linden FS	Innerbirrmoos
+23 Heim	A020	Gysenstein FS	Hobel
+23 Gast	A043	Oberdiessbach SG	Mouchenwasser
+24 Heim	A031	Konolfingen SG	Pänguins
+24 Gast	A049	Oberthal MS	TEAM 2014
+25 Heim	A001	Aareschützen Kiesen Oppligen	Aare
+25 Gast	A021	Gysenstein FS	Ringkorn
+26 Heim	A027	Konolfingen SG	Die Unbekannte
+26 Gast	A042	Oberdiessbach SG	Madagaskar
+27 Heim	A023	Häutligen FS	Eggacher
+27 Gast	A010	Biglen FS	Wirbelwind
+28 Heim	A064	Trimstein Eichi FS	Rambo
+28 Gast	A015	Falkenfluh-Schützen	Falkenfluh
+29 Heim	A050	Oberthal MS	TEAM 86
+29 Gast	A059	Sportschützen Furth	Zorro
+30 Heim	A006	Arni FS	Agrist
+30 Gast	A045	Oberthal MS	Eintracht
+31 Heim	A013	Bowil MS	Merlin
+31 Gast	A040	Oberdiessbach SG	90er Bande
+32 Heim	A062	Tägertschi FS	Tell
+32 Gast	A002	Aareschützen Kiesen Oppligen	Bahnhöfli
