@@ -7,43 +7,55 @@
 
 <style>
 body {
-  font-family: system-ui, sans-serif;
+  font-family: system-ui, Arial, sans-serif;
   background: #eef2f7;
   margin: 0;
   padding: 1rem;
 }
+h1 {
+  color: #1e3a8a;
+}
 .card {
-  background: white;
+  background: #ffffff;
+  border-radius: 10px;
   padding: 1rem;
   margin-bottom: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,.08);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
-h1 { color: #1e3a8a; }
-h2 { color: #2563eb; font-size: 1.1rem; }
+label {
+  font-weight: 600;
+  display: block;
+  margin-top: .5rem;
+}
+select, input {
+  width: 100%;
+  padding: .4rem;
+  margin-top: .2rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: .5rem;
 }
 th, td {
   border: 1px solid #ddd;
   padding: .3rem;
   text-align: center;
 }
-input, select, button {
-  width: 100%;
-  padding: .4rem;
-  border-radius: 6px;
+tfoot td {
+  font-weight: bold;
+  background: #f3f4f6;
 }
 button {
   background: #2563eb;
   color: white;
   border: none;
+  padding: .6rem;
+  border-radius: 999px;
+  width: 100%;
   cursor: pointer;
-}
-.sum {
-  font-weight: bold;
-  background: #f3f4f6;
 }
 </style>
 </head>
@@ -53,33 +65,35 @@ button {
 <h1>Amtscup – Cup-Duell</h1>
 
 <div class="card">
-  <h2>Gruppen</h2>
+  <label>Gruppe 1</label>
   <select id="gruppe1"></select>
+
+  <label>Gruppe 2</label>
   <select id="gruppe2"></select>
 </div>
 
 <div class="card">
-  <h2>Schützen – Gruppe 1</h2>
+  <h3>Schützen – Gruppe 1</h3>
   <table>
     <thead>
       <tr><th>Name</th><th>Resultat</th></tr>
     </thead>
     <tbody id="g1"></tbody>
     <tfoot>
-      <tr><td>Summe</td><td id="sum1" class="sum"></td></tr>
+      <tr><td>Summe</td><td id="sum1">0</td></tr>
     </tfoot>
   </table>
 </div>
 
 <div class="card">
-  <h2>Schützen – Gruppe 2</h2>
+  <h3>Schützen – Gruppe 2</h3>
   <table>
     <thead>
       <tr><th>Name</th><th>Resultat</th></tr>
     </thead>
     <tbody id="g2"></tbody>
     <tfoot>
-      <tr><td>Summe</td><td id="sum2" class="sum"></td></tr>
+      <tr><td>Summe</td><td id="sum2">0</td></tr>
     </tfoot>
   </table>
 </div>
@@ -90,9 +104,18 @@ button {
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-const GROUPS_URL =
-  "https://raw.githubusercontent.com/thomannpeter-ctrl/amtscup-app/hauptsächlich/gruppen.txt";
+/* -------------------------
+   Feste Gruppen (KEIN 404)
+-------------------------- */
+const GROUPS = [
+  "Arni FS – Gruppe 1",
+  "Sumiswald – Elite",
+  "Burgdorf – Gruppe Rot"
+];
 
+/* -------------------------
+   Hilfsfunktionen
+-------------------------- */
 function makeRows(tbody) {
   for (let i = 0; i < 5; i++) {
     const tr = document.createElement("tr");
@@ -102,7 +125,7 @@ function makeRows(tbody) {
   }
 }
 
-function sumTable(tbody) {
+function calcSum(tbody) {
   let sum = 0;
   tbody.querySelectorAll("input[type=number]").forEach(i => {
     sum += parseInt(i.value) || 0;
@@ -110,44 +133,44 @@ function sumTable(tbody) {
   return sum;
 }
 
-async function loadGroups() {
-  let txt = "";
-  try {
-    const r = await fetch(GROUPS_URL);
-    txt = await r.text();
-  } catch {
-    txt = "Gruppe A\nGruppe B";
-  }
-  const groups = txt.split(/\r?\n/).filter(x => x.trim());
-  [gruppe1, gruppe2].forEach(sel => {
-    sel.innerHTML = "";
-    groups.forEach(g => {
-      const o = document.createElement("option");
-      o.textContent = g;
-      sel.appendChild(o);
-    });
+/* -------------------------
+   Initialisierung
+-------------------------- */
+function init() {
+  GROUPS.forEach(g => {
+    const o1 = document.createElement("option");
+    o1.textContent = g;
+    gruppe1.appendChild(o1);
+
+    const o2 = document.createElement("option");
+    o2.textContent = g;
+    gruppe2.appendChild(o2);
   });
+
+  makeRows(g1);
+  makeRows(g2);
+
+  setInterval(() => {
+    sum1.textContent = calcSum(g1);
+    sum2.textContent = calcSum(g2);
+  }, 300);
 }
 
+/* -------------------------
+   Excel Export
+-------------------------- */
 function exportExcel() {
   const data = [
-    ["Gruppe 1", gruppe1.value, sumTable(g1)],
-    ["Gruppe 2", gruppe2.value, sumTable(g2)]
+    ["Gruppe 1", gruppe1.value, calcSum(g1)],
+    ["Gruppe 2", gruppe2.value, calcSum(g2)]
   ];
   const ws = XLSX.utils.aoa_to_sheet(data);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Amtscup");
-  XLSX.writeFile(wb, "amtscup.xlsx");
+  XLSX.writeFile(wb, "Amtscup_CupDuell.xlsx");
 }
 
-makeRows(g1);
-makeRows(g2);
-loadGroups();
-
-setInterval(() => {
-  sum1.textContent = sumTable(g1);
-  sum2.textContent = sumTable(g2);
-}, 500);
+init();
 </script>
 
 </body>
