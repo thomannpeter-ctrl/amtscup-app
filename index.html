@@ -7,13 +7,14 @@
 
 <style>
 *{box-sizing:border-box}
-body{font-family:system-ui;background:#eef2f7;margin:0}
+body{font-family:system-ui;background:#eef2f7;margin:0;color:#111}
 .container{max-width:1100px;margin:auto;padding:1rem}
-h1{color:#1e3a8a}
+h1{color:#1e3a8a;margin-bottom:.5rem}
+h2{color:#1d4ed8;font-size:1.2rem;margin:.5rem 0}
 .card{background:#fff;border-radius:12px;padding:1rem;margin-bottom:1rem;box-shadow:0 4px 10px rgba(0,0,0,.08)}
 .row{display:flex;gap:.75rem;flex-wrap:wrap}
 .field{flex:1;min-width:200px}
-label{font-size:.8rem;font-weight:600}
+label{font-size:.8rem;font-weight:600;color:#374151}
 input,select,textarea{width:100%;padding:.45rem;border-radius:8px;border:1px solid #cbd5f5}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th,td{border:1px solid #e5e7eb;padding:.35rem;text-align:center}
@@ -22,27 +23,141 @@ th{background:#dbeafe}
 button{border:none;border-radius:999px;padding:.45rem .9rem;cursor:pointer}
 .btn-primary{background:#2563eb;color:#fff}
 .btn-secondary{background:#e5e7eb}
+.btn-danger{background:#dc2626;color:#fff}
+.group-title{font-weight:700;margin:.3rem 0}
 .winner-box{margin-top:.5rem;padding:.6rem;border-radius:999px;font-weight:700}
 .winner-none{background:#e5e7eb}
 .winner-g1{background:#dcfce7}
 .winner-g2{background:#dbeafe}
-.preview-img{max-width:200px;display:none;margin-top:.5rem;border-radius:8px}
+.winner-g3{background:#fee2e2}
+.winner-draw{background:#fef9c3}
+.preview-img{max-width:200px;display:none;margin-top:.5rem;border-radius:8px;border:1px solid #e5e7eb}
+.error{border-color:#dc2626!important;background:#fee2e2!important}
+@media(max-width:640px){th,td{font-size:.75rem}}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<h1>Amtscup – Cup-Duell</h1>
+<h1>Amtscup – Cup-Duell (bis zu drei Gruppen)</h1>
+
+<!-- ================= Gruppenchef ================= -->
+<div class="card">
+<h2>1. Gruppenchef & Gruppen</h2>
+<div class="row">
+<div class="field">
+<label>Name Gruppenchef</label>
+<input id="chefName">
+</div>
+<div class="field">
+<label>E-Mail Gruppenchef</label>
+<input id="chefEmail" type="email">
+</div>
+</div>
+
+<div class="row">
+<div class="field">
+<label>Gruppe 1</label>
+<select id="gruppe1Select"></select>
+</div>
+<div class="field">
+<label>Andere Gruppe 1</label>
+<input id="gruppe1Other">
+</div>
+</div>
+
+<div class="row">
+<div class="field">
+<label>Gruppe 2</label>
+<select id="gruppe2Select"></select>
+</div>
+<div class="field">
+<label>Andere Gruppe 2</label>
+<input id="gruppe2Other">
+</div>
+</div>
+
+<div class="row" id="gruppe3Row" style="display:none">
+<div class="field">
+<label>Gruppe 3</label>
+<select id="gruppe3Select"></select>
+</div>
+<div class="field">
+<label>Andere Gruppe 3</label>
+<input id="gruppe3Other">
+</div>
+</div>
+
+<button id="addGroup3Btn" class="btn-secondary">➕ 3. Gruppe hinzufügen</button>
+</div>
+
+<!-- ================= Tabellen ================= -->
+<div class="card">
+<h2>2. Gruppe 1</h2>
+<div class="group-title" id="gruppe1TitleLabel">Gruppe 1</div>
+<table>
+<thead>
+<tr><th>Schütze</th><th>Name*</th><th>Jg*</th><th>Gerät*</th><th>Resultat*</th><th>Z</th><th>Total</th></tr>
+</thead>
+<tbody id="shootersBody1"></tbody>
+<tfoot>
+<tr><th colspan="4">Summe</th><th id="sumResult1"></th><th id="sumZuschlag1"></th><th id="sumTotal1"></th></tr>
+</tfoot>
+</table>
+</div>
 
 <div class="card">
-<h2>Bild / PDF hochladen (optional)</h2>
+<h2>3. Gruppe 2</h2>
+<div class="group-title" id="gruppe2TitleLabel">Gruppe 2</div>
+<table>
+<thead>
+<tr><th>Schütze</th><th>Name*</th><th>Jg*</th><th>Gerät*</th><th>Resultat*</th><th>Z</th><th>Total</th></tr>
+</thead>
+<tbody id="shootersBody2"></tbody>
+<tfoot>
+<tr><th colspan="4">Summe</th><th id="sumResult2"></th><th id="sumZuschlag2"></th><th id="sumTotal2"></th></tr>
+</tfoot>
+</table>
+</div>
+
+<div class="card" id="gruppe3Card" style="display:none">
+<h2>4. Gruppe 3</h2>
+<div class="group-title" id="gruppe3TitleLabel">Gruppe 3</div>
+<table>
+<thead>
+<tr><th>Schütze</th><th>Name*</th><th>Jg*</th><th>Gerät*</th><th>Resultat*</th><th>Z</th><th>Total</th></tr>
+</thead>
+<tbody id="shootersBody3"></tbody>
+<tfoot>
+<tr><th colspan="4">Summe</th><th id="sumResult3"></th><th id="sumZuschlag3"></th><th id="sumTotal3"></th></tr>
+</tfoot>
+</table>
+</div>
+
+<!-- ================= Sieger ================= -->
+<div class="card">
+<h2>5. Sieger</h2>
+<div id="winnerBox" class="winner-box winner-none">Noch keine Resultate</div>
+</div>
+
+<!-- ================= Upload ================= -->
+<div class="card">
+<h2>6. Bild oder PDF hochladen (optional)</h2>
 <input id="fileUpload" type="file" accept="image/*,.pdf">
 <img id="imagePreview" class="preview-img">
 </div>
 
+<!-- ================= Export ================= -->
 <div class="card">
-<h2>Admin: Gruppen / Vereine</h2>
+<h2>7. Export & Versand</h2>
+<button id="exportBtn" class="btn-secondary">📄 Excel exportieren</button>
+<button id="sendBtn" class="btn-primary">📧 E-Mail senden</button>
+</div>
+
+<!-- ================= Admin ================= -->
+<div class="card">
+<h2>Admin – Gruppen / Vereine</h2>
 
 <div id="adminLocked">
 <label>Admin-Passwort</label>
@@ -52,7 +167,8 @@ button{border:none;border-radius:999px;padding:.45rem .9rem;cursor:pointer}
 
 <div id="adminArea" style="display:none">
 <textarea id="groupsText" rows="6"></textarea>
-<button id="saveGroupsBtn" class="btn-primary">Speichern</button>
+<button id="saveGroupsBtn" class="btn-primary">💾 Gruppen speichern</button>
+<button id="resetGroupsBtn" class="btn-secondary">↺ Standard</button>
 </div>
 </div>
 
@@ -61,52 +177,186 @@ button{border:none;border-radius:999px;padding:.45rem .9rem;cursor:pointer}
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
+/* ================= KONFIG ================= */
 const RESULT_EMAIL="thomannpeter@bluewin.ch";
 
-/* 🔒 SHA-256 Hash von: Leona/3006/2021 */
-const ADMIN_PASSWORD_HASH=
-"7b0e3e0b3bbad52f1b7c7f9c2b6f9b1f6f3cb91f2f4b8e8a9b6b1c4f2b1a9c2e";
+/* SHA-256 von: Leona/3006/2021 */
+const ADMIN_PASSWORD_HASH="7b0e3e0b3bbad52f1b7c7f9c2b6f9b1f6f3cb91f2f4b8e8a9b6b1c4f2b1a9c2e";
 
-/* ---------- Passwort Hash ---------- */
-async function hashPassword(text){
- const enc=new TextEncoder().encode(text);
- const buf=await crypto.subtle.digest("SHA-256",enc);
- return Array.from(new Uint8Array(buf))
- .map(b=>b.toString(16).padStart(2,"0")).join("");
+const SPORTGERAETE=[
+{name:"",zuschlag:0},
+{name:"Standard",zuschlag:0},
+{name:"Freigewehr",zuschlag:0},
+{name:"Karabiner",zuschlag:4},
+{name:"57/02",zuschlag:8},
+{name:"57/03",zuschlag:4},
+{name:"90BK",zuschlag:4},
+{name:"90RK",zuschlag:4}
+];
+
+const DEFAULT_GROUPS=`Arni FS – Gruppe 1
+Sumiswald – Elite
+Burgdorf – Gruppe Rot`;
+
+let group3Enabled=false;
+
+/* ================= HILFSFUNKTIONEN ================= */
+async function hashPassword(t){
+ const e=new TextEncoder().encode(t);
+ const b=await crypto.subtle.digest("SHA-256",e);
+ return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 
-/* ---------- Admin Login ---------- */
-document.getElementById("adminLoginBtn").addEventListener("click",async()=>{
- const val=document.getElementById("adminPassword").value;
- const hash=await hashPassword(val);
- if(hash===ADMIN_PASSWORD_HASH){
-  document.getElementById("adminLocked").style.display="none";
-  document.getElementById("adminArea").style.display="block";
- }else{
-  alert("Falsches Passwort");
+function parseGroups(t){return t.split(/\r?\n/).map(x=>x.trim()).filter(Boolean)}
+
+function fillSelect(sel,groups){
+ sel.innerHTML='<option value="">Bitte wählen …</option>';
+ groups.forEach(g=>{
+  const o=document.createElement("option");
+  o.value=o.textContent=g;
+  sel.appendChild(o);
+ });
+}
+
+function loadGroups(){
+ const t=localStorage.getItem("amtscupGroups")||DEFAULT_GROUPS;
+ const g=parseGroups(t);
+ fillSelect(gruppe1Select,g);
+ fillSelect(gruppe2Select,g);
+ fillSelect(gruppe3Select,g);
+ groupsText.value=t;
+ updateTitles();
+}
+
+function effName(n){
+ if(n===1)return gruppe1Other.value||gruppe1Select.value||"Gruppe 1";
+ if(n===2)return gruppe2Other.value||gruppe2Select.value||"Gruppe 2";
+ if(n===3)return gruppe3Other.value||gruppe3Select.value||"Gruppe 3";
+}
+
+function updateTitles(){
+ gruppe1TitleLabel.textContent=effName(1);
+ gruppe2TitleLabel.textContent=effName(2);
+ if(gruppe3TitleLabel)gruppe3TitleLabel.textContent=effName(3);
+}
+
+/* ================= TABELLEN ================= */
+function createRows(group){
+ const body=document.getElementById(group===1?"shootersBody1":group===2?"shootersBody2":"shootersBody3");
+ body.innerHTML="";
+ for(let i=1;i<=5;i++){
+  const tr=document.createElement("tr");
+  tr.innerHTML=`
+  <td>${i}</td>
+  <td><input class="name"></td>
+  <td><input class="year" type="number"></td>
+  <td><select class="geraet"></select></td>
+  <td><input class="res" type="number"></td>
+  <td class="z"></td>
+  <td class="t"></td>`;
+  body.appendChild(tr);
  }
-});
+ body.querySelectorAll(".geraet").forEach(s=>{
+  SPORTGERAETE.forEach(g=>{
+   const o=document.createElement("option");
+   o.value=o.textContent=g.name;
+   s.appendChild(o);
+  });
+  s.onchange=()=>calc(group);
+ });
+ body.querySelectorAll(".res").forEach(i=>i.oninput=()=>calc(group));
+}
 
-/* ---------- Upload Bild / PDF ---------- */
-const fileInput=document.getElementById("fileUpload");
-const preview=document.getElementById("imagePreview");
+function calc(group){
+ const body=document.getElementById(group===1?"shootersBody1":group===2?"shootersBody2":"shootersBody3");
+ let sr=0,sz=0,st=0;
+ body.querySelectorAll("tr").forEach(tr=>{
+  const r=parseInt(tr.querySelector(".res").value)||0;
+  const g=SPORTGERAETE.find(x=>x.name===tr.querySelector(".geraet").value)?.zuschlag||0;
+  tr.querySelector(".z").textContent=g||"";
+  tr.querySelector(".t").textContent=r||g?(r+g):"";
+  sr+=r;sz+=g;st+=r+g;
+ });
+ document.getElementById("sumResult"+group).textContent=sr||"";
+ document.getElementById("sumZuschlag"+group).textContent=sz||"";
+ document.getElementById("sumTotal"+group).textContent=st||"";
+ updateWinner();
+}
 
-fileInput.addEventListener("change",()=>{
- const file=fileInput.files[0];
- if(!file){preview.style.display="none";return;}
+function updateWinner(){
+ const t1=parseInt(sumTotal1.textContent)||0;
+ const t2=parseInt(sumTotal2.textContent)||0;
+ const t3=group3Enabled?(parseInt(sumTotal3.textContent)||0):0;
+ const arr=[
+ {n:effName(1),t:t1,c:"winner-g1"},
+ {n:effName(2),t:t2,c:"winner-g2"},
+ ...(group3Enabled?[{n:effName(3),t:t3,c:"winner-g3"}]:[])
+ ].filter(x=>x.t>0);
+ if(!arr.length){winnerBox.className="winner-box winner-none";winnerBox.textContent="Noch keine Resultate";return;}
+ arr.sort((a,b)=>b.t-a.t);
+ const best=arr[0];
+ const tie=arr.filter(x=>x.t===best.t);
+ if(tie.length>1){
+  winnerBox.className="winner-box winner-draw";
+  winnerBox.textContent="🤝 Unentschieden – "+tie.map(x=>x.n).join(" / ");
+ }else{
+  winnerBox.className="winner-box "+best.c;
+  winnerBox.textContent="🏆 Sieger: "+best.n;
+ }
+}
 
- if(file.type.startsWith("image/")){
+/* ================= ADMIN ================= */
+adminLoginBtn.onclick=async()=>{
+ const h=await hashPassword(adminPassword.value);
+ if(h===ADMIN_PASSWORD_HASH){
+  adminLocked.style.display="none";
+  adminArea.style.display="block";
+ }else alert("Falsches Passwort");
+};
+
+saveGroupsBtn.onclick=()=>{
+ localStorage.setItem("amtscupGroups",groupsText.value);
+ loadGroups();
+};
+
+resetGroupsBtn.onclick=()=>{
+ localStorage.removeItem("amtscupGroups");
+ loadGroups();
+};
+
+/* ================= UPLOAD ================= */
+fileUpload.onchange=()=>{
+ const f=fileUpload.files[0];
+ if(!f){imagePreview.style.display="none";return;}
+ if(f.type.startsWith("image/")){
   const r=new FileReader();
-  r.onload=e=>{
-   preview.src=e.target.result;
-   preview.style.display="block";
-  };
-  r.readAsDataURL(file);
+  r.onload=e=>{imagePreview.src=e.target.result;imagePreview.style.display="block";}
+  r.readAsDataURL(f);
  }else{
-  preview.style.display="none";
-  alert("PDF ausgewählt: "+file.name+"\nBitte im Mailprogramm manuell anhängen.");
+  imagePreview.style.display="none";
+  alert("PDF ausgewählt: "+f.name+"\nBitte im Mailprogramm manuell anhängen.");
  }
-});
+};
+
+/* ================= INIT ================= */
+loadGroups();
+createRows(1);
+createRows(2);
+
+addGroup3Btn.onclick=()=>{
+ group3Enabled=!group3Enabled;
+ gruppe3Row.style.display=group3Enabled?"flex":"none";
+ gruppe3Card.style.display=group3Enabled?"block":"none";
+ if(group3Enabled)createRows(3);
+ updateWinner();
+};
+
+gruppe1Select.onchange=updateTitles;
+gruppe2Select.onchange=updateTitles;
+gruppe3Select.onchange=updateTitles;
+gruppe1Other.oninput=updateTitles;
+gruppe2Other.oninput=updateTitles;
+gruppe3Other.oninput=updateTitles;
 </script>
 
 </body>
