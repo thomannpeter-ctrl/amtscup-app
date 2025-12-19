@@ -1,70 +1,234 @@
-<div class="table-scroll">
-<table style="width:100%; min-width:1300px">
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Amtscup – Cup-Duell</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f6f8;
+}
+
+header {
+  background: #0b3d91;
+  color: white;
+  padding: 14px 20px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.section {
+  background: white;
+  margin: 16px;
+  padding: 16px;
+  border-radius: 6px;
+}
+
+h2 {
+  margin-top: 0;
+  color: #0b3d91;
+}
+
+label {
+  display: block;
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+input, select {
+  width: 100%;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 1200px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  text-align: center;
+}
+
+th {
+  background: #e9eef6;
+}
+
+.sum-row {
+  background: #f0f0f0;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<header>Amtscup – Cup-Duell</header>
+
+<!-- PAARUNG -->
+<div class="section">
+<h2>Paarung</h2>
+
+<label>Gruppe 1 *</label>
+<input>
+
+<label>Gruppe 2 (optional)</label>
+<input>
+
+<label>Gruppe 3 (optional)</label>
+<input>
+</div>
+
+<!-- GRUPPE 1 -->
+<div class="section">
+<h2>Schützen – Gruppe 1</h2>
+
+<div class="table-wrap">
+<table>
 <tr>
-  <th>#</th>
-  <th>Name*</th>
-  <th>Jahrgang*</th>
-  <th>Sportgerät*</th>
-  <th>Resultat*</th>
-  <th>Zuschlag</th>
-  <th>Total</th>
+<th>#</th>
+<th>Name *</th>
+<th>Jahrgang *</th>
+<th>Sportgerät *</th>
+<th>Resultat *</th>
+<th>Zuschlag</th>
+<th>Total</th>
 </tr>
 
 <tr>
-  <td>1</td>
-  <td><input></td>
-  <td><input></td>
-  <td><select><option></option></select></td>
-  <td><input type="number"></td>
-  <td>0</td>
-  <td>0</td>
+<td>1</td>
+<td><input></td>
+<td><input></td>
+<td>
+<select>
+<option></option>
+<option>57/03</option>
+<option>90</option>
+</select>
+</td>
+<td><input type="number"></td>
+<td>0</td>
+<td>0</td>
 </tr>
 
 <tr>
-  <td>2</td>
-  <td><input></td>
-  <td><input></td>
-  <td><select></select></td>
-  <td><input type="number"></td>
-  <td>0</td>
-  <td>0</td>
+<td>2</td>
+<td><input></td>
+<td><input></td>
+<td><select></select></td>
+<td><input type="number"></td>
+<td>0</td>
+<td>0</td>
 </tr>
 
 <tr>
-  <td>3</td>
-  <td><input></td>
-  <td><input></td>
-  <td><select></select></td>
-  <td><input type="number"></td>
-  <td>0</td>
-  <td>0</td>
+<td>3</td>
+<td><input></td>
+<td><input></td>
+<td><select></select></td>
+<td><input type="number"></td>
+<td>0</td>
+<td>0</td>
 </tr>
 
 <tr>
-  <td>4</td>
-  <td><input></td>
-  <td><input></td>
-  <td><select></select></td>
-  <td><input type="number"></td>
-  <td>0</td>
-  <td>0</td>
+<td>4</td>
+<td><input></td>
+<td><input></td>
+<td><select></select></td>
+<td><input type="number"></td>
+<td>0</td>
+<td>0</td>
 </tr>
 
 <tr>
-  <td>5</td>
-  <td><input></td>
-  <td><input></td>
-  <td><select></select></td>
-  <td><input type="number"></td>
-  <td>0</td>
-  <td>0</td>
+<td>5</td>
+<td><input></td>
+<td><input></td>
+<td><select></select></td>
+<td><input type="number"></td>
+<td>0</td>
+<td>0</td>
 </tr>
 
-<tr class="sum">
-  <td colspan="4">Summe Gruppe 1</td>
-  <td>0</td>
-  <td>0</td>
-  <td><strong>0</strong></td>
+<tr class="sum-row">
+<td colspan="4">Summe Gruppe 1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
 </tr>
 </table>
 </div>
+</div>
+
+<!-- GRUPPE 2 -->
+<div class="section">
+<h2>Schützen – Gruppe 2 (optional)</h2>
+
+<div class="table-wrap">
+<table>
+<tr>
+<th>#</th>
+<th>Name</th>
+<th>Jahrgang</th>
+<th>Sportgerät</th>
+<th>Resultat</th>
+<th>Zuschlag</th>
+<th>Total</th>
+</tr>
+
+<tr><td>1</td><td><input></td><td><input></td><td><select></select></td><td><input></td><td>0</td><td>0</td></tr>
+<tr><td>2</td><td><input></td><td><input></td><td><select></select></td><td><input></td><td>0</td><td>0</td></tr>
+<tr><td>3</td><td><input></td><td><input></td><td><select></select></td><td><input></td><td>0</td><td>0</td></tr>
+
+<tr class="sum-row">
+<td colspan="4">Summe Gruppe 2</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</table>
+</div>
+</div>
+
+<!-- GRUPPE 3 -->
+<div class="section">
+<h2>Schützen – Gruppe 3 (optional)</h2>
+
+<div class="table-wrap">
+<table>
+<tr>
+<th>#</th>
+<th>Name</th>
+<th>Jahrgang</th>
+<th>Sportgerät</th>
+<th>Resultat</th>
+<th>Zuschlag</th>
+<th>Total</th>
+</tr>
+
+<tr><td>1</td><td><input></td><td><input></td><td><select></select></td><td><input></td><td>0</td><td>0</td></tr>
+<tr><td>2</td><td><input></td><td><input></td><td><select></select></td><td><input></td><td>0</td><td>0</td></tr>
+
+<tr class="sum-row">
+<td colspan="4">Summe Gruppe 3</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</table>
+</div>
+</div>
+
+</body>
+</html>
