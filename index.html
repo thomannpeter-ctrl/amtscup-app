@@ -1,234 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <title>Amtscup – Cup-Duell</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: #f4f6f8;
-}
-
-header {
-  background: #0b3d91;
-  color: white;
-  padding: 14px 20px;
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.section {
-  background: white;
-  margin: 16px;
-  padding: 16px;
-  border-radius: 6px;
-}
-
-h2 {
-  margin-top: 0;
-  color: #0b3d91;
-}
-
-label {
-  display: block;
-  margin-top: 8px;
-  font-weight: bold;
-}
-
-input, select {
-  width: 100%;
-  padding: 6px;
-  box-sizing: border-box;
-}
-
-.table-wrap {
-  overflow-x: auto;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 1200px;
-}
-
-th, td {
-  border: 1px solid #ccc;
-  padding: 6px;
-  text-align: center;
-}
-
-th {
-  background: #e9eef6;
-}
-
-.sum-row {
-  background: #f0f0f0;
-  font-weight: bold;
-}
+body{font-family:system-ui;background:#eef2f7;margin:0}
+.container{max-width:1100px;margin:auto;padding:1rem}
+.card{background:#fff;border-radius:12px;padding:1rem;margin-bottom:1rem;box-shadow:0 4px 10px rgba(0,0,0,.1)}
+input,select{width:100%;padding:.4rem;border-radius:6px;border:1px solid #cbd5f5}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #e5e7eb;padding:.3rem;text-align:center}
+button{padding:.5rem 1rem;border:none;border-radius:999px;cursor:pointer}
+.btn-primary{background:#2563eb;color:#fff}
 </style>
 </head>
 
 <body>
+<div class="container">
 
-<header>Amtscup – Cup-Duell</header>
-
-<!-- PAARUNG -->
-<div class="section">
-<h2>Paarung</h2>
-
-<label>Gruppe 1 *</label>
-<input>
-
-<label>Gruppe 2 (optional)</label>
-<input>
-
-<label>Gruppe 3 (optional)</label>
-<input>
+<div class="card">
+<input id="chefName" placeholder="Gruppenchef Name">
+<input id="chefEmail" placeholder="E-Mail">
+<input id="gruppe1Other" placeholder="Gruppe 1">
+<input id="gruppe2Other" placeholder="Gruppe 2">
+<input id="gruppe3Other" placeholder="Gruppe 3 (optional)">
 </div>
 
-<!-- GRUPPE 1 -->
-<div class="section">
-<h2>Schützen – Gruppe 1</h2>
-
-<div class="table-wrap">
+<div class="card">
 <table>
-<tr>
-<th>#</th>
-<th>Name *</th>
-<th>Jahrgang *</th>
-<th>Sportgerät *</th>
-<th>Resultat *</th>
-<th>Zuschlag</th>
-<th>Total</th>
-</tr>
-
-<tr>
-<td>1</td>
-<td><input></td>
-<td><input></td>
-<td>
-<select>
-<option></option>
-<option>57/03</option>
-<option>90</option>
-</select>
-</td>
-<td><input type="number"></td>
-<td>0</td>
-<td>0</td>
-</tr>
-
-<tr>
-<td>2</td>
-<td><input></td>
-<td><input></td>
-<td><select></select></td>
-<td><input type="number"></td>
-<td>0</td>
-<td>0</td>
-</tr>
-
-<tr>
-<td>3</td>
-<td><input></td>
-<td><input></td>
-<td><select></select></td>
-<td><input type="number"></td>
-<td>0</td>
-<td>0</td>
-</tr>
-
-<tr>
-<td>4</td>
-<td><input></td>
-<td><input></td>
-<td><select></select></td>
-<td><input type="number"></td>
-<td>0</td>
-<td>0</td>
-</tr>
-
-<tr>
-<td>5</td>
-<td><input></td>
-<td><input></td>
-<td><select></select></td>
-<td><input type="number"></td>
-<td>0</td>
-<td>0</td>
-</tr>
-
-<tr class="sum-row">
-<td colspan="4">Summe Gruppe 1</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-</tr>
+<thead>
+<tr><th>Name</th><th>Resultat</th></tr>
+</thead>
+<tbody id="shootersBody1">
+<tr><td><input></td><td><input type="number"></td></tr>
+<tr><td><input></td><td><input type="number"></td></tr>
+</tbody>
 </table>
 </div>
+
+<div class="card">
+<button class="btn-primary" onclick="buildEmailAndSend()">Absenden</button>
 </div>
 
-<!-- GRUPPE 2 -->
-<div class="section">
-<h2>Schützen – Gruppe 2 (optional)</h2>
-
-<div class="table-wrap">
-<table>
-<tr>
-<th>#</th>
-<th>Name</th>
-<th>Jahrgang</th>
-<th>Sportgerät</th>
-<th>Resultat</th>
-<th>Zuschlag</th>
-<th>Total</th>
-</tr>
-
-<tr><td>1</td><td><input></td><td><input></td><td><select></select></td><td><input></td><td>0</td><td>0</td></tr>
-<tr><td>2</td><td><input></td><td><input></td><td><select></select></td><td><input></td><td>0</td><td>0</td></tr>
-<tr><td>3</td><td><input></td><td><input></td><td><select></select></td><td><input></td><td>0</td><td>0</td></tr>
-
-<tr class="sum-row">
-<td colspan="4">Summe Gruppe 2</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-</tr>
-</table>
-</div>
 </div>
 
-<!-- GRUPPE 3 -->
-<div class="section">
-<h2>Schützen – Gruppe 3 (optional)</h2>
+<script>
+const RESULT_EMAIL="thomannpeter@bluewin.ch"
+const GOOGLE_SHEETS_URL="https://script.google.com/macros/s/AKfycbyzYZlUCpIiHsB_5a4gWyXM0SnrwPR_bMg_ke2AdOFkrLvOc2qsa5pCmbk6EWQjD-w7mw/exec"
 
-<div class="table-wrap">
-<table>
-<tr>
-<th>#</th>
-<th>Name</th>
-<th>Jahrgang</th>
-<th>Sportgerät</th>
-<th>Resultat</th>
-<th>Zuschlag</th>
-<th>Total</th>
-</tr>
+function buildEmailAndSend(){
+const chefName=document.getElementById("chefName").value
+const chefEmail=document.getElementById("chefEmail").value
+const group1Name=document.getElementById("gruppe1Other").value
+const group2Name=document.getElementById("gruppe2Other").value
+const group3Name=document.getElementById("gruppe3Other").value
 
-<tr><td>1</td><td><input></td><td><input></td><td><select></select></td><td><input></td><td>0</td><td>0</td></tr>
-<tr><td>2</td><td><input></td><td><input></td><td><select></select></td><td><input></td><td>0</td><td>0</td></tr>
+let total1=0
+document.querySelectorAll("#shootersBody1 tr").forEach(r=>{
+const v=parseInt(r.children[1].firstChild.value||0)
+total1+=v
+})
 
-<tr class="sum-row">
-<td colspan="4">Summe Gruppe 3</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-</tr>
-</table>
-</div>
-</div>
+const winnerText=group1Name+" ("+total1+")"
+
+const payload={
+chefName,
+chefEmail,
+group1Name,
+group2Name,
+group3Name,
+totals:{t1:{sumTotal:total1},t2:{sumTotal:0},t3:{sumTotal:0}},
+winnerText
+}
+
+fetch(GOOGLE_SHEETS_URL,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(payload)
+})
+
+const subject="Amtscup Cup-Duell – "+group1Name
+const body=
+"Gruppenchef: "+chefName+"\n"+
+"E-Mail: "+chefEmail+"\n"+
+"Gruppe 1: "+group1Name+"\n"+
+"Total: "+total1+"\n"+
+"Sieger: "+winnerText
+
+window.location.href=
+"mailto:"+RESULT_EMAIL+
+"?subject="+encodeURIComponent(subject)+
+"&body="+encodeURIComponent(body)
+}
+</script>
 
 </body>
 </html>
