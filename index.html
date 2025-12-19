@@ -3,73 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <title>Amtscup – Cup-Duell</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f5f7fa;
+body{
+  font-family:Arial, sans-serif;
+  background:#f4f6fa;
   margin:0;
-  padding:20px;
+  padding:16px;
 }
-h1 {
+h1,h2{
   color:#1f3c88;
 }
-.section {
+.section{
   background:#fff;
-  padding:15px;
   margin-bottom:20px;
+  padding:16px;
   border-radius:6px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
-
-label {
-  font-weight:bold;
-}
-
-input, select {
+input,select{
   width:100%;
   padding:6px;
   box-sizing:border-box;
 }
-
-.table-wrap {
+.table-scroll{
   overflow-x:auto;
-  width:100%;
+  margin-top:10px;
 }
-
-table {
+table{
   border-collapse:collapse;
-  min-width:900px;
+  min-width:1100px; /* WICHTIG */
   width:100%;
 }
-
-th, td {
+th,td{
   border:1px solid #ccc;
   padding:6px;
   text-align:center;
 }
-
-th {
-  background:#e8eefc;
+th{
+  background:#e9efff;
 }
-
-.sum-row {
-  background:#f0f0f0;
+.sum{
   font-weight:bold;
+  background:#f0f0f0;
 }
-
-button {
-  padding:10px 16px;
+button{
+  padding:12px 18px;
   background:#1f3c88;
   color:#fff;
   border:none;
   border-radius:4px;
   cursor:pointer;
-}
-
-button:hover {
-  background:#16306b;
 }
 </style>
 </head>
@@ -78,110 +63,62 @@ button:hover {
 
 <h1>Amtscup – Cup-Duell</h1>
 
-<!-- PAARUNGEN -->
 <div class="section">
   <h2>Paarung</h2>
   <label>Gruppe 1 *</label>
-  <input id="g1" required>
-
+  <input>
   <label>Gruppe 2 (optional)</label>
-  <input id="g2">
-
+  <input>
   <label>Gruppe 3 (optional)</label>
-  <input id="g3">
+  <input>
 </div>
 
-<!-- GRUPPE 1 -->
 <div class="section">
-  <h2>Schützen – Gruppe 1</h2>
-  <div class="table-wrap">
-  <table id="t1">
-    <tr>
-      <th>#</th>
-      <th>Name *</th>
-      <th>Jahrgang *</th>
-      <th>Sportgerät *</th>
-      <th>Resultat *</th>
-    </tr>
-  </table>
-  </div>
-  <p><strong>Summe Gruppe 1:</strong> <span id="sum1">0</span></p>
+<h2>Schützen – Gruppe 1</h2>
+<div class="table-scroll">
+<table>
+<tr>
+<th>#</th><th>Name*</th><th>Jahrgang*</th><th>Sportgerät*</th><th>Resultat*</th>
+</tr>
+<tr><td>1</td><td><input></td><td><input></td><td><select><option></option></select></td><td><input type="number"></td></tr>
+<tr><td>2</td><td><input></td><td><input></td><td><select><option></option></select></td><td><input type="number"></td></tr>
+<tr><td>3</td><td><input></td><td><input></td><td><select><option></option></select></td><td><input type="number"></td></tr>
+<tr><td>4</td><td><input></td><td><input></td><td><select><option></option></select></td><td><input type="number"></td></tr>
+<tr><td>5</td><td><input></td><td><input></td><td><select><option></option></select></td><td><input type="number"></td></tr>
+<tr class="sum"><td colspan="4">Summe Gruppe 1</td><td>0</td></tr>
+</table>
+</div>
 </div>
 
-<!-- GRUPPE 2 -->
 <div class="section">
-  <h2>Schützen – Gruppe 2</h2>
-  <div class="table-wrap">
-  <table id="t2">
-    <tr>
-      <th>#</th>
-      <th>Name</th>
-      <th>Jahrgang</th>
-      <th>Sportgerät</th>
-      <th>Resultat</th>
-    </tr>
-  </table>
-  </div>
-  <p><strong>Summe Gruppe 2:</strong> <span id="sum2">0</span></p>
+<h2>Schützen – Gruppe 2 (optional)</h2>
+<div class="table-scroll">
+<table>
+<tr>
+<th>#</th><th>Name</th><th>Jahrgang</th><th>Sportgerät</th><th>Resultat</th>
+</tr>
+<tr><td>1</td><td><input></td><td><input></td><td><select></select></td><td><input type="number"></td></tr>
+<tr><td>2</td><td><input></td><td><input></td><td><select></select></td><td><input type="number"></td></tr>
+<tr class="sum"><td colspan="4">Summe Gruppe 2</td><td>0</td></tr>
+</table>
+</div>
 </div>
 
-<!-- GRUPPE 3 -->
 <div class="section">
-  <h2>Schützen – Gruppe 3</h2>
-  <div class="table-wrap">
-  <table id="t3">
-    <tr>
-      <th>#</th>
-      <th>Name</th>
-      <th>Jahrgang</th>
-      <th>Sportgerät</th>
-      <th>Resultat</th>
-    </tr>
-  </table>
-  </div>
-  <p><strong>Summe Gruppe 3:</strong> <span id="sum3">0</span></p>
+<h2>Schützen – Gruppe 3 (optional)</h2>
+<div class="table-scroll">
+<table>
+<tr>
+<th>#</th><th>Name</th><th>Jahrgang</th><th>Sportgerät</th><th>Resultat</th>
+</tr>
+<tr><td>1</td><td><input></td><td><input></td><td><select></select></td><td><input type="number"></td></tr>
+<tr><td>2</td><td><input></td><td><input></td><td><select></select></td><td><input type="number"></td></tr>
+<tr class="sum"><td colspan="4">Summe Gruppe 3</td><td>0</td></tr>
+</table>
+</div>
 </div>
 
-<button onclick="submitForm()">Meldung absenden</button>
-
-<script>
-function buildTable(id, rows) {
-  const table = document.getElementById(id);
-  for (let i = 1; i <= rows; i++) {
-    const r = table.insertRow();
-    r.innerHTML = `
-      <td>${i}</td>
-      <td><input></td>
-      <td><input></td>
-      <td>
-        <select>
-          <option value="">–</option>
-          <option value="57/03">57/03</option>
-          <option value="57/02">57/02</option>
-        </select>
-      </td>
-      <td><input type="number" value="0" oninput="calc()"></td>
-    `;
-  }
-}
-
-buildTable("t1",5);
-buildTable("t2",5);
-buildTable("t3",5);
-
-function calc() {
-  ["t1","t2","t3"].forEach((t,i)=>{
-    let sum = 0;
-    document.querySelectorAll(`#${t} input[type=number]`)
-      .forEach(e => sum += Number(e.value||0));
-    document.getElementById("sum"+(i+1)).innerText = sum;
-  });
-}
-
-function submitForm() {
-  alert("Formular ist vollständig sichtbar & funktionsbereit ✔");
-}
-</script>
+<button>Meldung absenden</button>
 
 </body>
 </html>
