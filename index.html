@@ -1,116 +1,329 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>Amtscup – Cup-Duell</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
 *{box-sizing:border-box}
-body{font-family:system-ui,sans-serif;background:#eef2f7;margin:0}
-.container{max-width:1200px;margin:auto;padding:1rem}
-.card{background:#fff;border-radius:14px;padding:1rem;margin-bottom:1rem}
-table{width:100%;border-collapse:collapse;font-size:.85rem}
-th,td{border:1px solid #ccc;padding:.4rem;text-align:center}
+body{font-family:system-ui,sans-serif;background:#eef2f7;margin:0;color:#111827}
+.container{max-width:1100px;margin:auto;padding:1rem}
+h1{color:#1e3a8a;margin:.2rem 0 1rem}
+h2{color:#1d4ed8;margin:.5rem 0}
+.card{background:#fff;border-radius:14px;padding:1rem 1.25rem;box-shadow:0 4px 10px rgba(15,23,42,.08);margin-bottom:1rem}
+.row{display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end}
+.field{flex:1;min-width:220px}
+label{font-size:.8rem;font-weight:600;display:block;margin-bottom:.25rem}
+input,select{width:100%;padding:.45rem;border-radius:8px;border:1px solid #cbd5f5}
+.input-year{max-width:90px}
+.input-result{max-width:90px}
+th.gear,td.gear{width:140px}
+th.zcol,td.zcol{width:75px}
+th.sexcol,td.sexcol{width:90px}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{border:1px solid #e5e7eb;padding:.4rem;text-align:center}
 th{background:#dbeafe}
-input,select{width:100%}
-button{padding:1rem;width:100%;font-size:1rem}
+button{border:none;border-radius:999px;padding:.9rem;font-size:1rem;cursor:pointer;background:#2563eb;color:white;width:100%}
+.small{font-size:.85rem;color:#374151}
+.warn{color:#b45309}
+.ok{color:#166534}
 </style>
 </head>
 
 <body>
 <div class="container">
+  <h1>Amtscup – Cup-Duell</h1>
 
-<h1>Amtscup – Cup-Duell</h1>
+  <div class="card">
+    <h2>1. Gruppenchef</h2>
+    <div class="row">
+      <div class="field"><label>Name</label><input id="chef" autocomplete="name"></div>
+      <div class="field"><label>E-Mail</label><input id="email" type="email" autocomplete="email"></div>
+    </div>
+    <div class="row" style="margin-top:.6rem">
+      <div class="field" style="min-width:180px;max-width:260px">
+        <label>Datum (optional)</label>
+        <input id="datum" placeholder="TT.MM.JJJJ">
+      </div>
+      <div class="field">
+        <label>Wettkampf (optional)</label>
+        <input id="wettkampf" value="Amtscup" />
+      </div>
+    </div>
+    <div class="small" style="margin-top:.4rem">
+      Tipp: Datum kannst du leer lassen – wenn du willst, füllen wir es später automatisch.
+    </div>
+  </div>
 
-<div class="card">
-<label>Gruppenchef</label><input id="chef">
-<label>E-Mail</label><input id="email">
-</div>
+  <div class="card">
+    <h2>2. Gruppenauswahl</h2>
+    <div class="row">
+      <div class="field">
+        <label>Gruppe *</label>
+        <select id="g1"></select>
+      </div>
+    </div>
+    <div class="small" style="margin-top:.4rem">
+      Erwartetes Format in <b>gruppen.txt</b>: <code>Komb;Runde;GrpNr;Verein;Gruppe</code>
+    </div>
+  </div>
 
-<div class="card">
-<label>Gruppe</label>
-<select id="gruppe"></select>
-</div>
+  <div id="groupCard"></div>
 
-<div id="block"></div>
-
-<div class="card">
-<button onclick="sendResult()">📧 Mail & Google senden</button>
-</div>
-
+  <div class="card">
+    <button onclick="sendMailAndGoogle()">📧 Mail &amp; Google senden</button>
+    <div id="status" class="small" style="margin-top:.5rem"></div>
+  </div>
 </div>
 
 <script>
-const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz1YSiGxzltZwPwgdIlPXKQeAHT-8UponjHP8pC5nqJ-T8CeGKTcAJ0RpBuV_61e4Qs/exec";
+/** ========= KONFIG ========= */
 const RESULT_EMAIL = "thomannpeter@bluewin.ch";
 
+/* HIER deine Apps-Script WebApp URL eintragen (aus "Bereitstellen") */
+const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz1YSiGxzltZwPwgdIlPXKQeAHT-8UponjHP8pC5nqJ-T8CeGKTcAJ0RpBuV_61e4Qs/exec";
+
+/** ========= SPORTGERÄTE / ZUSCHLAG ========= */
+const SPORTGERAETE = [
+  {n:"",z:0},{n:"Standard",z:0},{n:"FG",z:0},
+  {n:"Karabiner",z:4},{n:"57/02",z:8},{n:"57/03",z:4},
+  {n:"90BK",z:4},{n:"90RK",z:4}
+];
+const zus = g => (SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
+
+/** ========= gruppen.txt laden =========
+ * Zeile: Komb;Runde;GrpNr;Verein;Gruppe
+ */
 async function loadGroups(){
- const r=await fetch("gruppen.txt");
- const list=(await r.text()).split(/\r?\n/).filter(x=>x);
- const s=document.getElementById("gruppe");
- s.innerHTML="<option></option>";
- list.forEach(g=>{
-  const o=document.createElement("option");
-  o.textContent=o.value=g;
-  s.appendChild(o);
- });
- s.onchange=build;
+  const r = await fetch("gruppen.txt?ts="+Date.now());
+  const lines = (await r.text()).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+
+  const groups = lines.map(line=>{
+    const parts = line.split(";").map(p=>p.trim());
+    // robust: falls jemand Komma oder Tab verwendet:
+    if(parts.length < 5) {
+      const alt = line.split(",").map(p=>p.trim());
+      if(alt.length >= 5) return {raw: line, komb: alt[0], runde: alt[1], grpNr: alt[2], verein: alt[3], gruppe: alt[4]};
+    }
+    return {raw: line, komb: parts[0]||"", runde: parts[1]||"", grpNr: parts[2]||"", verein: parts[3]||"", gruppe: parts[4]||""};
+  });
+
+  const s = document.getElementById("g1");
+  s.innerHTML = "<option value=''>Bitte wählen…</option>";
+  groups.forEach(g=>{
+    const o = document.createElement("option");
+    o.value = g.raw; // wir speichern die Rohzeile
+    // schöne Anzeige im Dropdown:
+    o.textContent = `${g.komb} | R${g.runde} | ${g.grpNr} | ${g.verein} – ${g.gruppe}`;
+    s.appendChild(o);
+  });
+
+  s.onchange = () => buildGroupCard();
 }
 
-function build(){
- block.innerHTML="";
- const name=gruppe.value;
- if(!name) return;
- block.innerHTML=`<div class="card"><h2>${name}</h2>
- <table><thead>
- <tr><th>#</th><th>Name</th><th>Jahrgang</th><th>Gender</th><th>Sportgerät</th><th>Resultat</th></tr>
- </thead><tbody id="tb"></tbody></table></div>`;
- for(let i=1;i<=5;i++){
-  tb.innerHTML+=`<tr>
-   <td>${i}</td>
-   <td><input class="n"></td>
-   <td><input class="y"></td>
-   <td>
-    <select class="g"><option></option><option>m</option><option>w</option></select>
-   </td>
-   <td><input class="s"></td>
-   <td><input class="r"></td>
-  </tr>`;
- }
+function parseGroupRaw(raw){
+  const parts = raw.split(";").map(x=>x.trim());
+  return {
+    komb: parts[0]||"",
+    runde: parts[1]||"",
+    grpNr: parts[2]||"",
+    verein: parts[3]||"",
+    gruppe: parts[4]||""
+  };
 }
 
-function sendResult(){
- let mail="AMTSCUP RESULTAT\n\n";
- let rows=[];
- document.querySelectorAll("#tb tr").forEach((tr,i)=>{
-  const n=tr.querySelector(".n").value;
-  if(!n) return;
-  const y=tr.querySelector(".y").value;
-  const g=tr.querySelector(".g").value;
-  const s=tr.querySelector(".s").value;
-  const r=tr.querySelector(".r").value;
-  const row=[
-   new Date().toLocaleDateString(),
-   "Amtscup",
-   "",
-   1,
-   "",
-   "",
-   gruppe.value,
-   i+1,
-   n,y,g,s,r,0,r
-  ];
-  rows.push(row);
-  mail+=`${n};${y};${g};${s};${r}\n`;
- });
+/** ========= UI bauen ========= */
+function buildGroupCard(){
+  const raw = document.getElementById("g1").value;
+  const host = document.getElementById("groupCard");
+  host.innerHTML = "";
+  if(!raw) return;
 
- fetch(GOOGLE_URL,{
-  method:"POST",
-  body:JSON.stringify({rows}),
-  headers:{"Content-Type":"application/json"}
- });
+  const g = parseGroupRaw(raw);
 
- location.href=`mailto:${RESULT_EMAIL}?subject=Amtscup Resultat&body=${encodeURIComponent(mail)}`;
+  const c = document.createElement("div");
+  c.className = "card";
+  c.dataset.raw = raw;
+
+  c.innerHTML = `
+    <h2>${g.verein} – ${g.gruppe}</h2>
+    <div class="small">
+      <b>Komb:</b> ${g.komb} &nbsp; | &nbsp; <b>Runde:</b> ${g.runde} &nbsp; | &nbsp; <b>GrpNr:</b> ${g.grpNr}
+    </div>
+    <div style="margin-top:.7rem"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Jahrgang</th>
+          <th class="sexcol">Gender</th>
+          <th class="gear">Sportgerät</th>
+          <th>Resultat</th>
+          <th class="zcol">Zuschlag</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <th colspan="5">Summe</th>
+          <th class="sr">0</th>
+          <th class="sz">0</th>
+          <th class="st">0</th>
+        </tr>
+      </tfoot>
+    </table>
+  `;
+
+  const tb = c.querySelector("tbody");
+  for(let i=1;i<=5;i++){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i}</td>
+      <td><input class="n"></td>
+      <td><input class="y input-year" placeholder="z.B. 2012"></td>
+      <td class="sexcol">
+        <select class="sex">
+          <option value=""></option>
+          <option value="m">m</option>
+          <option value="w">w</option>
+        </select>
+      </td>
+      <td class="gear"><select class="g"></select></td>
+      <td><input class="r input-result" placeholder="0"></td>
+      <td class="zcol z">0</td>
+      <td class="t">0</td>
+    `;
+    SPORTGERAETE.forEach(s=>{
+      const o = document.createElement("option");
+      o.value = o.textContent = s.n;
+      tr.querySelector(".g").appendChild(o);
+    });
+
+    tr.querySelectorAll("input,select").forEach(e=>e.oninput=()=>calc(c));
+    tb.appendChild(tr);
+  }
+
+  host.appendChild(c);
+  calc(c);
+}
+
+function calc(c){
+  let sr=0,sz=0,st=0;
+  c.querySelectorAll("tbody tr").forEach(tr=>{
+    const r = +tr.querySelector(".r").value || 0;
+    const z = zus(tr.querySelector(".g").value);
+    tr.querySelector(".z").textContent = z;
+    tr.querySelector(".t").textContent = r + z;
+    sr += r; sz += z; st += r + z;
+  });
+  c.querySelector(".sr").textContent = sr;
+  c.querySelector(".sz").textContent = sz;
+  c.querySelector(".st").textContent = st;
+}
+
+/** ========= Senden: Google + Mail ========= */
+async function sendMailAndGoogle(){
+  const status = document.getElementById("status");
+  status.textContent = "";
+
+  const raw = document.getElementById("g1").value;
+  if(!raw){
+    status.innerHTML = "<span class='warn'>Bitte zuerst eine Gruppe wählen.</span>";
+    return;
+  }
+  if(!GOOGLE_URL || GOOGLE_URL.includes("HIER_DEINE_WEBAPP_URL")){
+    status.innerHTML = "<span class='warn'>Bitte GOOGLE_URL im Code eintragen (Apps Script WebApp URL).</span>";
+    return;
+  }
+
+  const g = parseGroupRaw(raw);
+  const chefVal = document.getElementById("chef").value || "";
+  const emailVal = document.getElementById("email").value || "";
+  const datumVal = document.getElementById("datum").value || "";
+  const wettkampfVal = document.getElementById("wettkampf").value || "Amtscup";
+
+  const c = document.querySelector("#groupCard .card");
+  if(!c){
+    status.innerHTML = "<span class='warn'>Keine Eingabetabelle gefunden.</span>";
+    return;
+  }
+
+  // Rows für Google Sheet aufbauen:
+  // Datum | Wettkampf | Komb | Runde | GrpNr | Verein | Gruppe | Nr | Name | Jahrgang | Gender | Sportgerät | Resultat | Zuschlag | Total | Gruppenchef | Email
+  const rows = [];
+  c.querySelectorAll("tbody tr").forEach((tr, idx)=>{
+    const name = tr.querySelector(".n").value.trim();
+    const jahr = tr.querySelector(".y").value.trim();
+    const gender = tr.querySelector(".sex").value.trim();
+    const gear = tr.querySelector(".g").value.trim();
+    const res = (tr.querySelector(".r").value || "").trim();
+    const z = tr.querySelector(".z").textContent.trim();
+    const t = tr.querySelector(".t").textContent.trim();
+
+    // nur sinnvolle Zeilen senden
+    if(name || res){
+      rows.push([
+        datumVal,
+        wettkampfVal,
+        g.komb,
+        g.runde,
+        g.grpNr,
+        g.verein,
+        g.gruppe,
+        String(idx+1),
+        name,
+        jahr,
+        gender,
+        gear,
+        res,
+        z,
+        t,
+        chefVal,
+        emailVal
+      ]);
+    }
+  });
+
+  if(rows.length === 0){
+    status.innerHTML = "<span class='warn'>Keine Daten erfasst (mind. Name oder Resultat eintragen).</span>";
+    return;
+  }
+
+  // 1) Google senden (no-cors, damit es in jedem Browser zuverlässig durchläuft)
+  try{
+    await fetch(GOOGLE_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ rows })
+    });
+    status.innerHTML = "<span class='ok'>✅ An Google gesendet.</span>";
+  }catch(e){
+    status.innerHTML = "<span class='warn'>⚠️ Google senden fehlgeschlagen (URL / Berechtigung prüfen).</span>";
+    // trotzdem Mail ermöglichen
+  }
+
+  // 2) Mail öffnen
+  const mailBody = buildMailBody({
+    datumVal, wettkampfVal, chefVal, emailVal, g, rows
+  });
+  const subject = "Amtscup Resultat";
+  location.href = `mailto:${RESULT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(mailBody)}`;
+}
+
+function buildMailBody({datumVal,wettkampfVal,chefVal,emailVal,g,rows}){
+  let body = `${wettkampfVal}\n`;
+  if(datumVal) body += `Datum: ${datumVal}\n`;
+  body += `Gruppenchef: ${chefVal}\nE-Mail: ${emailVal}\n\n`;
+  body += `GRUPPE:\nKomb: ${g.komb}\nRunde: ${g.runde}\nGrpNr: ${g.grpNr}\nVerein: ${g.verein}\nGruppe: ${g.gruppe}\n\n`;
+  body += "Nr;Name;Jahrgang;Gender;Sportgerät;Resultat;Zuschlag;Total\n";
+  rows.forEach(r=>{
+    // r: [Datum,Wettkampf,Komb,Runde,GrpNr,Verein,Gruppe,Nr,Name,Jahrgang,Gender,Sportgerät,Resultat,Zuschlag,Total,Chef,Email]
+    body += `${r[7]};${r[8]};${r[9]};${r[10]};${r[11]};${r[12]};${r[13]};${r[14]}\n`;
+  });
+  return body;
 }
 
 loadGroups();
