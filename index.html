@@ -79,6 +79,41 @@ const SPORTGERAETE=[
 ];
 const zus=g=>(SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
 
+/* ================= FIX: Zustand merken ================= */
+const groupState = {}; // key: 1..3  value: [{n,y,sex,g,r},...]
+
+function snapshotGroup(card){
+  const idx = +card.dataset.idx;
+  const rows = [...card.querySelectorAll("tbody tr")].map(tr=>({
+    n: tr.querySelector(".n").value,
+    y: tr.querySelector(".y").value,
+    sex: tr.querySelector("select.sex").value,
+    g: tr.querySelector(".g").value,
+    r: tr.querySelector(".r").value
+  }));
+  groupState[idx] = rows;
+}
+
+function snapshotAll(){
+  document.querySelectorAll("#groups .card").forEach(snapshotGroup);
+}
+
+function restoreGroup(card){
+  const idx = +card.dataset.idx;
+  const saved = groupState[idx];
+  if(!saved) return;
+  const trs = [...card.querySelectorAll("tbody tr")];
+  saved.slice(0, trs.length).forEach((s,i)=>{
+    const tr = trs[i];
+    tr.querySelector(".n").value = s.n || "";
+    tr.querySelector(".y").value = s.y || "";
+    tr.querySelector("select.sex").value = s.sex || "";
+    tr.querySelector(".g").value = s.g || "";
+    tr.querySelector(".r").value = s.r || "";
+  });
+  calc(card);
+}
+
 /* ================= Gruppen ================= */
 
 async function loadGroups(){
@@ -97,11 +132,17 @@ async function loadGroups(){
 }
 
 function buildGroups(){
+ // FIX: Vor dem Neuaufbau Eingaben sichern
+ snapshotAll();
+
  groups.innerHTML="";
  [1,2,3].forEach(n=>{
   const name=document.getElementById("g"+n).value;
   if(!name) return;
-  groups.appendChild(createGroup(n,name));
+  const card = createGroup(n,name);
+  groups.appendChild(card);
+  // FIX: Nach dem Neuaufbau Eingaben wiederherstellen
+  restoreGroup(card);
  });
  calcWinner();
 }
@@ -110,6 +151,7 @@ function createGroup(n,name){
  const c=document.createElement("div");
  c.className="card";
  c.dataset.name=name;
+ c.dataset.idx=n; // wichtig fürs Speichern/Wiederherstellen
  c.innerHTML=`<h2>Gruppe ${n}: ${name}</h2><table>
  <thead><tr>
  <th>#</th><th>Name</th><th>Jahrgang</th><th class="sex">Gender</th>
@@ -191,7 +233,7 @@ function sendAll(){
      gruppe:c.dataset.name,
      name,
      jahr:tr.querySelector(".y").value,
-     gender:tr.querySelector(".sex").value,
+     gender:tr.querySelector("select.sex").value,
      geraet:tr.querySelector(".g").value,
      resultat:res,
      zuschlag:tr.querySelector(".z").textContent,
