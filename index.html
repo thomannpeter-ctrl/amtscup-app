@@ -161,22 +161,6 @@ function calc(c){
  calcWinner();
 }
 
-function calcWinner(){
- const d=[...elGroups.children]
-  .map(c=>({n:c.dataset.name,t:+c.querySelector(".st").textContent}))
-  .filter(x=>x.t>0).sort((a,b)=>b.t-a.t);
-
- if(!d.length){
-  elWinner.textContent="Noch keine Resultate";
-  elWinner.className="winner winner-none";
-  return;
- }
- elWinner.className="winner winner-ok";
- elWinner.innerHTML=d.length===2
- ?`🏆 Sieger: ${d[0].n} (${d[0].t})<br>❌ Verlierer: ${d[1].n} (${d[1].t})`
- :`🏆 Sieger: ${d[0].n} (${d[0].t}) & ${d[1].n} (${d[1].t})<br>❌ Verlierer: ${d[2].n} (${d[2].t})`;
-}
-
 /* ================= STATE ================= */
 function save(c){
  state[c.dataset.idx]=[...c.querySelectorAll("tbody tr")].map(tr=>({
@@ -205,14 +189,24 @@ function restore(c){
 /* ================= SEND ================= */
 function sendAll(){
 
- let valid=false;
+ let hasCompleteGroup=false;
+
  [...elGroups.children].forEach(c=>{
-  c.querySelectorAll("tbody tr").forEach(tr=>{
-   if(tr.querySelector(".n").value && tr.querySelector(".r").value) valid=true;
-  });
+   let full=true;
+   c.querySelectorAll("tbody tr").forEach(tr=>{
+     if(
+       !tr.querySelector(".n").value ||
+       !tr.querySelector(".y").value ||
+       !tr.querySelector(".sex").value ||
+       !tr.querySelector(".g").value ||
+       !tr.querySelector(".r").value
+     ) full=false;
+   });
+   if(full) hasCompleteGroup=true;
  });
- if(!valid){
-  alert("❗ Mindestens eine Gruppe muss ausgefüllt sein (Name + Resultat).");
+
+ if(!hasCompleteGroup){
+  alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein (alle 5 Schützen).");
   return;
  }
 
@@ -226,25 +220,22 @@ function sendAll(){
   mail+="Name;Jahrgang;Gender;Sportgerät;Resultat;Zuschlag;Total\n";
   c.querySelectorAll("tbody tr").forEach(tr=>{
    const n=tr.querySelector(".n").value;
-   const r=tr.querySelector(".r").value;
-   if(!n&&!r) return;
+   if(!n) return;
    rows.push({
     gruppe:c.dataset.name,
     name:n,
     jahr:tr.querySelector(".y").value,
     gender:tr.querySelector(".sex").value,
     geraet:tr.querySelector(".g").value,
-    resultat:r,
+    resultat:tr.querySelector(".r").value,
     zuschlag:tr.querySelector(".z").textContent,
     total:tr.querySelector(".t").textContent,
     gruppentotal:gt
    });
-   mail+=`${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${r};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
+   mail+=`${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${tr.querySelector(".r").value};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
   });
   mail+="\n";
  });
-
- mail+="SIEGER:\n"+elWinner.textContent;
 
  location.href=`mailto:${RESULT_EMAIL}?subject=${encodeURIComponent("Amtscup Resultat")}&body=${encodeURIComponent(mail)}`;
 
