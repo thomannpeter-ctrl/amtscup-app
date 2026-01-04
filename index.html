@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html> 
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -66,7 +66,6 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 </div>
 
 <script>
-/* ================= KONFIG ================= */
 const RESULT_EMAIL = "thomannpeter@bluewin.ch";
 const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz1ZQO-T2JbllYVwwILeAS20iq0nFLGvdKcxgYz2_bs9TNmLmm5tQnfB9PfeTTBJ_oI/exec";
 
@@ -77,15 +76,12 @@ const SPORTGERAETE=[
 ];
 const zus=g=>(SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
 
-/* ================= DOM ================= */
 const elChef=chef, elEmail=email, elGroups=groups, elWinner=winner;
 const elG=[g1,g2,g3];
 sendBtn.onclick=sendAll;
 
-/* ================= STATE ================= */
 const state={};
 
-/* ================= LOAD GROUPS ================= */
 async function loadGroups(){
  const r=await fetch("gruppen.txt?"+Date.now());
  const list=(await r.text()).split(/\r?\n/).filter(Boolean);
@@ -100,7 +96,6 @@ async function loadGroups(){
  });
 }
 
-/* ================= BUILD ================= */
 function build(){
  [...elGroups.children].forEach(c=>save(c));
  elGroups.innerHTML="";
@@ -145,7 +140,6 @@ function createGroup(i,name){
  return c;
 }
 
-/* ================= CALC ================= */
 function calc(c){
  let sr=0,sz=0,st=0;
  c.querySelectorAll("tbody tr").forEach(tr=>{
@@ -173,7 +167,6 @@ function calcWinner(){
  :`🏆 Sieger: ${d[0].n} (${d[0].t}) & ${d[1].n} (${d[1].t})<br>❌ Verlierer: ${d[2].n} (${d[2].t})`;
 }
 
-/* ================= STATE SAVE ================= */
 function save(c){
  state[c.dataset.idx]=[...c.querySelectorAll("tbody tr")].map(tr=>({
   n:tr.querySelector(".n").value,
@@ -198,7 +191,7 @@ function restore(c){
  calc(c);
 }
 
-/* ================= SEND ================= */
+/* ================= SEND (SUMMEN IM MAIL) ================= */
 function sendAll(){
 
  let valid=false;
@@ -213,13 +206,14 @@ function sendAll(){
  const rows=[];
 
  [...elGroups.children].forEach((c,i)=>{
-  const gt=c.querySelector(".st").textContent;
   mail+=`GRUPPE ${i+1}: ${c.dataset.name}\n`;
   mail+="Name;Jahrgang;Gender;Sportgerät;Resultat;Zuschlag;Total\n";
+
   c.querySelectorAll("tbody tr").forEach(tr=>{
    const n=tr.querySelector(".n").value;
    const r=tr.querySelector(".r").value;
    if(!n&&!r) return;
+
    rows.push({
     gruppe:c.dataset.name,
     name:n,
@@ -229,11 +223,13 @@ function sendAll(){
     resultat:r,
     zuschlag:tr.querySelector(".z").textContent,
     total:tr.querySelector(".t").textContent,
-    gruppentotal:gt
+    gruppentotal:c.querySelector(".st").textContent
    });
+
    mail+=`${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${r};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
   });
-  mail+="\n";
+
+  mail+=`Summe;;;;${c.querySelector(".sr").textContent};${c.querySelector(".sz").textContent};${c.querySelector(".st").textContent}\n\n`;
  });
 
  mail+="SIEGER:\n"+elWinner.textContent;
