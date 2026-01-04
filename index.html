@@ -161,31 +161,6 @@ function calc(c){
  calcWinner();
 }
 
-/* ================= STATE ================= */
-function save(c){
- state[c.dataset.idx]=[...c.querySelectorAll("tbody tr")].map(tr=>({
-  n:tr.querySelector(".n").value,
-  y:tr.querySelector(".y").value,
-  s:tr.querySelector(".sex").value,
-  g:tr.querySelector(".g").value,
-  r:tr.querySelector(".r").value
- }));
-}
-
-function restore(c){
- const d=state[c.dataset.idx];
- if(!d) return;
- c.querySelectorAll("tbody tr").forEach((tr,i)=>{
-  if(!d[i]) return;
-  tr.querySelector(".n").value=d[i].n;
-  tr.querySelector(".y").value=d[i].y;
-  tr.querySelector(".sex").value=d[i].s;
-  tr.querySelector(".g").value=d[i].g;
-  tr.querySelector(".r").value=d[i].r;
- });
- calc(c);
-}
-
 /* ================= SEND ================= */
 function sendAll(){
 
@@ -215,26 +190,30 @@ function sendAll(){
 
  const rows=[];
  [...elGroups.children].forEach((c,i)=>{
-  const gt=c.querySelector(".st").textContent;
+  const sr=c.querySelector(".sr").textContent;
+  const sz=c.querySelector(".sz").textContent;
+  const st=c.querySelector(".st").textContent;
+
   mail+=`GRUPPE ${i+1}: ${c.dataset.name}\n`;
   mail+="Name;Jahrgang;Gender;Sportgerät;Resultat;Zuschlag;Total\n";
+
   c.querySelectorAll("tbody tr").forEach(tr=>{
    const n=tr.querySelector(".n").value;
    if(!n) return;
-   rows.push({
-    gruppe:c.dataset.name,
-    name:n,
-    jahr:tr.querySelector(".y").value,
-    gender:tr.querySelector(".sex").value,
-    geraet:tr.querySelector(".g").value,
-    resultat:tr.querySelector(".r").value,
-    zuschlag:tr.querySelector(".z").textContent,
-    total:tr.querySelector(".t").textContent,
-    gruppentotal:gt
-   });
    mail+=`${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${tr.querySelector(".r").value};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
   });
-  mail+="\n";
+
+  mail+=`\nGRUPPENTOTAL:\n`;
+  mail+=`Resultate ohne Zuschlag: ${sr}\n`;
+  mail+=`Zuschläge total:         ${sz}\n`;
+  mail+=`TOTAL inkl. Zuschlag:    ${st}\n\n`;
+
+  rows.push({
+    gruppe:c.dataset.name,
+    summe_resultat:sr,
+    summe_zuschlag:sz,
+    summe_total:st
+  });
  });
 
  location.href=`mailto:${RESULT_EMAIL}?subject=${encodeURIComponent("Amtscup Resultat")}&body=${encodeURIComponent(mail)}`;
