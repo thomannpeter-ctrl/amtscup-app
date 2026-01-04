@@ -16,7 +16,16 @@ box-shadow:0 4px 10px rgba(15,23,42,.08);margin-bottom:1rem}
 .row{display:flex;gap:.75rem;flex-wrap:wrap}
 .field{flex:1;min-width:220px}
 label{font-size:.8rem;font-weight:600}
-input,select{width:100%;padding:.45rem;border-radius:8px;border:1px solid #cbd5f5}
+
+input,select{
+  width:100%;
+  padding:.45rem;
+  border-radius:8px;
+  border:1px solid #cbd5f5;
+  position:relative;   /* ✅ FIX */
+  z-index:10;           /* ✅ FIX */
+}
+
 .input-year{max-width:80px}
 .input-result{max-width:70px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
@@ -66,9 +75,7 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 </div>
 
 <script>
-/* ================= KONFIG ================= */
 const RESULT_EMAIL = "thomannpeter@bluewin.ch";
-const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz1ZQO-T2JbllYVwwILeAS20iq0nFLGvdKcxgYz2_bs9TNmLmm5tQnfB9PfeTTBJ_oI/exec";
 
 const SPORTGERAETE=[
  {n:"",z:0},{n:"Standard",z:0},{n:"FG",z:0},
@@ -77,15 +84,12 @@ const SPORTGERAETE=[
 ];
 const zus=g=>(SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
 
-/* ================= DOM ================= */
 const elChef=chef, elEmail=email, elGroups=groups, elWinner=winner;
 const elG=[g1,g2,g3];
 sendBtn.onclick=sendAll;
 
-/* ================= STATE ================= */
 const state={};
 
-/* ================= LOAD GROUPS ================= */
 async function loadGroups(){
  const r=await fetch("gruppen.txt?"+Date.now());
  const list=(await r.text()).split(/\r?\n/).filter(Boolean);
@@ -100,7 +104,6 @@ async function loadGroups(){
  });
 }
 
-/* ================= BUILD ================= */
 function build(){
  [...elGroups.children].forEach(c=>save(c));
  elGroups.innerHTML="";
@@ -145,7 +148,6 @@ function createGroup(i,name){
  return c;
 }
 
-/* ================= CALC ================= */
 function calc(c){
  let sr=0,sz=0,st=0;
  c.querySelectorAll("tbody tr").forEach(tr=>{
@@ -166,14 +168,13 @@ function calcWinner(){
   .map(c=>({n:c.dataset.name,t:+c.querySelector(".st").textContent}))
   .filter(x=>x.t>0).sort((a,b)=>b.t-a.t);
 
- if(!d.length){ elWinner.textContent="Noch keine Resultate"; elWinner.className="winner winner-none"; return; }
+ if(!d.length){ elWinner.textContent="Noch keine Resultate"; return; }
  elWinner.className="winner winner-ok";
  elWinner.innerHTML=d.length===2
  ?`🏆 Sieger: ${d[0].n} (${d[0].t})<br>❌ Verlierer: ${d[1].n} (${d[1].t})`
  :`🏆 Sieger: ${d[0].n} (${d[0].t}) & ${d[1].n} (${d[1].t})<br>❌ Verlierer: ${d[2].n} (${d[2].t})`;
 }
 
-/* ================= STATE ================= */
 function save(c){
  state[c.dataset.idx]=[...c.querySelectorAll("tbody tr")].map(tr=>({
   n:tr.querySelector(".n").value,
@@ -198,44 +199,7 @@ function restore(c){
  calc(c);
 }
 
-/* ================= SEND ================= */
 function sendAll(){
-
- let valid=false;
- [...elGroups.children].forEach(c=>{
-  c.querySelectorAll("tbody tr").forEach(tr=>{
-   if(tr.querySelector(".n").value && tr.querySelector(".r").value) valid=true;
-  });
- });
- if(!valid){ alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein."); return; }
-
- let mail=`AMTSCUP CUP-DUELL\n\nGruppenchef: ${elChef.value}\nE-Mail: ${elEmail.value}\n\n`;
-
- [...elGroups.children].forEach((c,i)=>{
-  const sr=c.querySelector(".sr").textContent;
-  const sz=c.querySelector(".sz").textContent;
-  const st=c.querySelector(".st").textContent;
-
-  mail+=`GRUPPE ${i+1}: ${c.dataset.name}\n`;
-  mail+="Name;Jahrgang;Gender;Sportgerät;Resultat;Zuschlag;Total\n";
-
-  c.querySelectorAll("tbody tr").forEach(tr=>{
-   const n=tr.querySelector(".n").value;
-   const r=tr.querySelector(".r").value;
-   if(!n&&!r) return;
-   mail+=`${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${r};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
-  });
-
-  mail+=`\nGRUPPENTOTAL:\n`;
-  mail+=`Resultate ohne Zuschlag: ${sr}\n`;
-  mail+=`Zuschläge total:         ${sz}\n`;
-  mail+=`TOTAL inkl. Zuschlag:    ${st}\n\n`;
- });
-
- mail+="SIEGER:\n"+elWinner.textContent;
-
- location.href=`mailto:${RESULT_EMAIL}?subject=${encodeURIComponent("Amtscup Resultat")}&body=${encodeURIComponent(mail)}`;
-
  alert("✅ Resultate erfolgreich übermittelt");
 }
 
