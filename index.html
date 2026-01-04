@@ -161,23 +161,65 @@ function calc(c){
  calcWinner();
 }
 
+/* ================= WINNER ================= */
+function calcWinner(){
+ const d=[...elGroups.children]
+  .map(c=>({n:c.dataset.name,t:+c.querySelector(".st").textContent}))
+  .filter(x=>x.t>0)
+  .sort((a,b)=>b.t-a.t);
+
+ if(!d.length){
+  elWinner.textContent="Noch keine Resultate";
+  elWinner.className="winner winner-none";
+  return;
+ }
+
+ elWinner.className="winner winner-ok";
+ if(d.length===2){
+  elWinner.innerHTML=`🏆 Sieger: ${d[0].n} (${d[0].t})<br>❌ Verlierer: ${d[1].n} (${d[1].t})`;
+ }else{
+  elWinner.innerHTML=`🏆 Sieger: ${d[0].n} (${d[0].t}) & ${d[1].n} (${d[1].t})<br>❌ Verlierer: ${d[2].n} (${d[2].t})`;
+ }
+}
+
+/* ================= STATE ================= */
+function save(c){
+ state[c.dataset.idx]=[...c.querySelectorAll("tbody tr")].map(tr=>({
+  n:tr.querySelector(".n").value,
+  y:tr.querySelector(".y").value,
+  s:tr.querySelector(".sex").value,
+  g:tr.querySelector(".g").value,
+  r:tr.querySelector(".r").value
+ }));
+}
+function restore(c){
+ const d=state[c.dataset.idx];
+ if(!d) return;
+ c.querySelectorAll("tbody tr").forEach((tr,i)=>{
+  if(!d[i]) return;
+  tr.querySelector(".n").value=d[i].n;
+  tr.querySelector(".y").value=d[i].y;
+  tr.querySelector(".sex").value=d[i].s;
+  tr.querySelector(".g").value=d[i].g;
+  tr.querySelector(".r").value=d[i].r;
+ });
+ calc(c);
+}
+
 /* ================= SEND ================= */
 function sendAll(){
-
  let hasCompleteGroup=false;
 
  [...elGroups.children].forEach(c=>{
-   let full=true;
-   c.querySelectorAll("tbody tr").forEach(tr=>{
-     if(
-       !tr.querySelector(".n").value ||
-       !tr.querySelector(".y").value ||
-       !tr.querySelector(".sex").value ||
-       !tr.querySelector(".g").value ||
-       !tr.querySelector(".r").value
-     ) full=false;
-   });
-   if(full) hasCompleteGroup=true;
+  let full=true;
+  c.querySelectorAll("tbody tr").forEach(tr=>{
+   if(!tr.querySelector(".n").value ||
+      !tr.querySelector(".y").value ||
+      !tr.querySelector(".sex").value ||
+      !tr.querySelector(".g").value ||
+      !tr.querySelector(".r").value) full=false;
+  });
+  if(full) hasCompleteGroup=true;
  });
 
  if(!hasCompleteGroup){
@@ -188,43 +230,21 @@ function sendAll(){
  let mail=`AMTSCUP CUP-DUELL\n\nGruppenchef: ${elChef.value}\nE-Mail: ${elEmail.value}\n\n`;
  mail+="📎 Hinweis: Das unterschriebene Standblatt bitte manuell als Datei oder Bild anhängen.\n\n";
 
- const rows=[];
  [...elGroups.children].forEach((c,i)=>{
   const sr=c.querySelector(".sr").textContent;
   const sz=c.querySelector(".sz").textContent;
   const st=c.querySelector(".st").textContent;
 
   mail+=`GRUPPE ${i+1}: ${c.dataset.name}\n`;
-  mail+="Name;Jahrgang;Gender;Sportgerät;Resultat;Zuschlag;Total\n";
-
   c.querySelectorAll("tbody tr").forEach(tr=>{
-   const n=tr.querySelector(".n").value;
-   if(!n) return;
-   mail+=`${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${tr.querySelector(".r").value};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
+   if(!tr.querySelector(".n").value) return;
+   mail+=`${tr.querySelector(".n").value};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${tr.querySelector(".r").value};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
   });
-
-  mail+=`\nGRUPPENTOTAL:\n`;
-  mail+=`Resultate ohne Zuschlag: ${sr}\n`;
-  mail+=`Zuschläge total:         ${sz}\n`;
-  mail+=`TOTAL inkl. Zuschlag:    ${st}\n\n`;
-
-  rows.push({
-    gruppe:c.dataset.name,
-    summe_resultat:sr,
-    summe_zuschlag:sz,
-    summe_total:st
-  });
+  mail+=`\nGRUPPENTOTAL:\nResultate ohne Zuschlag: ${sr}\nZuschläge total: ${sz}\nTOTAL inkl. Zuschlag: ${st}\n\n`;
  });
 
  location.href=`mailto:${RESULT_EMAIL}?subject=${encodeURIComponent("Amtscup Resultat")}&body=${encodeURIComponent(mail)}`;
-
- fetch(GOOGLE_URL,{
-  method:"POST",
-  mode:"no-cors",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({chef:elChef.value,email:elEmail.value,rows})
- });
-
+ fetch(GOOGLE_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},body:JSON.stringify({chef:elChef.value,email:elEmail.value})});
  alert("✅ Resultate erfolgreich übermittelt");
 }
 
