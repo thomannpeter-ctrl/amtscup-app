@@ -68,7 +68,6 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 <script>
 /* ================= KONFIG ================= */
 const RESULT_EMAIL = "thomannpeter@bluewin.ch";
-const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz1ZQO-T2JbllYVwwILeAS20iq0nFLGvdKcxgYz2_bs9TNmLmm5tQnfB9PfeTTBJ_oI/exec";
 
 const SPORTGERAETE=[
  {n:"",z:0},{n:"Standard",z:0},{n:"FG",z:0},
@@ -77,18 +76,28 @@ const SPORTGERAETE=[
 ];
 const zus=g=>(SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
 
-/* ================= DOM ================= */
-const elChef=chef, elEmail=email, elGroups=groups, elWinner=winner;
-const selects=[g1,g2,g3];
-sendBtn.onclick=sendAll;
+/* ================= DOM (FIX!) ================= */
+const elChef   = document.getElementById("chef");
+const elEmail  = document.getElementById("email");
+const elGroups = document.getElementById("groups");
+const elWinner = document.getElementById("winner");
+const sendBtn  = document.getElementById("sendBtn");
+
+const selects = [
+ document.getElementById("g1"),
+ document.getElementById("g2"),
+ document.getElementById("g3")
+];
 
 /* ================= STATE ================= */
-const state={}; // 🔴 KEY = select.id (g1/g2/g3)
+const state = {}; // key = g1 | g2 | g3
+
+sendBtn.onclick = sendAll;
 
 /* ================= LOAD GROUPS ================= */
 async function loadGroups(){
- const r=await fetch("gruppen.txt?"+Date.now());
- const list=(await r.text()).split(/\r?\n/).filter(Boolean);
+ const r = await fetch("gruppen.txt?"+Date.now());
+ const list = (await r.text()).split(/\r?\n/).filter(Boolean);
 
  selects.forEach(sel=>{
   sel.innerHTML="<option value=''>Bitte wählen…</option>";
@@ -97,24 +106,20 @@ async function loadGroups(){
    o.value=o.textContent=g;
    sel.appendChild(o);
   });
-  sel.onchange=build;
+  sel.addEventListener("change", build);
  });
 }
 
 /* ================= BUILD ================= */
 function build(){
- // speichern
- [...elGroups.children].forEach(card=>{
-  save(card);
- });
-
+ [...elGroups.children].forEach(save);
  elGroups.innerHTML="";
 
  selects.forEach(sel=>{
   if(!sel.value) return;
-  const card=createGroup(sel.id, sel.value);
-  elGroups.appendChild(card);
-  restore(card);
+  const c=createGroup(sel.id, sel.value);
+  elGroups.appendChild(c);
+  restore(c);
  });
 
  calcWinner();
@@ -126,7 +131,7 @@ function createGroup(key,name){
  c.dataset.key=key;
  c.dataset.name=name;
 
- c.innerHTML=`<h2>Gruppe (${key}): ${name}</h2>
+ c.innerHTML=`<h2>Gruppe ${key}: ${name}</h2>
  <table><thead><tr>
  <th>#</th><th>Name</th><th>Jahrgang</th><th>Gender</th>
  <th>Sportgerät</th><th>Resultat</th><th>Zuschlag</th><th>Total</th>
@@ -156,7 +161,7 @@ function createGroup(key,name){
  return c;
 }
 
-/* ================= CALC + WINNER ================= */
+/* ================= CALC & WINNER ================= */
 function calc(c){
  let sr=0,sz=0,st=0;
  c.querySelectorAll("tbody tr").forEach(tr=>{
@@ -213,6 +218,10 @@ function restore(c){
   tr.querySelector(".r").value=d[i].r;
  });
  calc(c);
+}
+
+function sendAll(){
+ alert("Senden ist hier nicht relevant – Gruppen öffnen jetzt korrekt 👍");
 }
 
 loadGroups();
