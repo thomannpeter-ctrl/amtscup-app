@@ -16,16 +16,7 @@ box-shadow:0 4px 10px rgba(15,23,42,.08);margin-bottom:1rem}
 .row{display:flex;gap:.75rem;flex-wrap:wrap}
 .field{flex:1;min-width:220px}
 label{font-size:.8rem;font-weight:600}
-
-input,select{
-  width:100%;
-  padding:.45rem;
-  border-radius:8px;
-  border:1px solid #cbd5f5;
-  position:relative;   /* ✅ FIX */
-  z-index:10;           /* ✅ FIX */
-}
-
+input,select{width:100%;padding:.45rem;border-radius:8px;border:1px solid #cbd5f5}
 .input-year{max-width:80px}
 .input-result{max-width:70px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
@@ -100,7 +91,8 @@ async function loadGroups(){
      o.value=o.textContent=g;
      s.appendChild(o);
    });
-   s.onchange=build;
+   // 🔴 EINZIGER FIX
+   s.onchange = () => setTimeout(build, 0);
  });
 }
 
