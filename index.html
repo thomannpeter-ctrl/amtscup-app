@@ -102,7 +102,7 @@ async function loadGroups(){
 
 /* ================= BUILD ================= */
 function build(){
- [...elGroups.children].forEach(c=>save(c));
+ [...elGroups.children].forEach(save);
  elGroups.innerHTML="";
  elG.forEach((s,i)=>{
    if(!s.value) return;
@@ -166,14 +166,18 @@ function calcWinner(){
   .map(c=>({n:c.dataset.name,t:+c.querySelector(".st").textContent}))
   .filter(x=>x.t>0).sort((a,b)=>b.t-a.t);
 
- if(!d.length){ elWinner.textContent="Noch keine Resultate"; elWinner.className="winner winner-none"; return; }
+ if(!d.length){
+  elWinner.textContent="Noch keine Resultate";
+  elWinner.className="winner winner-none";
+  return;
+ }
  elWinner.className="winner winner-ok";
  elWinner.innerHTML=d.length===2
  ?`🏆 Sieger: ${d[0].n} (${d[0].t})<br>❌ Verlierer: ${d[1].n} (${d[1].t})`
  :`🏆 Sieger: ${d[0].n} (${d[0].t}) & ${d[1].n} (${d[1].t})<br>❌ Verlierer: ${d[2].n} (${d[2].t})`;
 }
 
-/* ================= STATE SAVE ================= */
+/* ================= STATE ================= */
 function save(c){
  state[c.dataset.idx]=[...c.querySelectorAll("tbody tr")].map(tr=>({
   n:tr.querySelector(".n").value,
@@ -207,11 +211,15 @@ function sendAll(){
    if(tr.querySelector(".n").value && tr.querySelector(".r").value) valid=true;
   });
  });
- if(!valid){ alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein."); return; }
+ if(!valid){
+  alert("❗ Mindestens eine Gruppe muss ausgefüllt sein (Name + Resultat).");
+  return;
+ }
 
  let mail=`AMTSCUP CUP-DUELL\n\nGruppenchef: ${elChef.value}\nE-Mail: ${elEmail.value}\n\n`;
- const rows=[];
+ mail+="📎 Hinweis: Das unterschriebene Standblatt bitte manuell als Datei oder Bild anhängen.\n\n";
 
+ const rows=[];
  [...elGroups.children].forEach((c,i)=>{
   const gt=c.querySelector(".st").textContent;
   mail+=`GRUPPE ${i+1}: ${c.dataset.name}\n`;
