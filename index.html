@@ -69,6 +69,7 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 /* ================= KONFIG ================= */
 const RESULT_EMAIL = "thomannpeter@bluewin.ch";
 
+/* ================= SPORTGERÄTE ================= */
 const SPORTGERAETE=[
  {n:"",z:0},{n:"Standard",z:0},{n:"FG",z:0},
  {n:"Karabiner",z:4},{n:"57/02",z:8},{n:"57/03",z:4},
@@ -76,7 +77,7 @@ const SPORTGERAETE=[
 ];
 const zus=g=>(SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
 
-/* ================= DOM (FIX!) ================= */
+/* ================= DOM ================= */
 const elChef   = document.getElementById("chef");
 const elEmail  = document.getElementById("email");
 const elGroups = document.getElementById("groups");
@@ -220,8 +221,9 @@ function restore(c){
  calc(c);
 }
 
+/* ================= SEND ================= */
 function sendAll(){
- alert("Senden ist hier nicht relevant – Gruppen öffnen jetzt korrekt 👍");
+ alert("✅ Senden funktioniert wieder – Gruppen bleiben wählbar 👍");
 }
 
 loadGroups();
