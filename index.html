@@ -11,19 +11,52 @@ body{font-family:system-ui,sans-serif;background:#eef2f7;margin:0;color:#111827}
 .container{max-width:1200px;margin:auto;padding:1rem}
 h1{color:#1e3a8a}
 h2{color:#1d4ed8;margin:.5rem 0}
-.card{background:#fff;border-radius:14px;padding:1rem 1.25rem;
-box-shadow:0 4px 10px rgba(15,23,42,.08);margin-bottom:1rem}
+
+/* 🔑 Cards */
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:1rem 1.25rem;
+  box-shadow:0 4px 10px rgba(15,23,42,.08);
+  margin-bottom:1rem;
+  position:relative;
+  z-index:1;
+}
+
+/* 🔑 Gruppenauswahl IMMER oben */
+#groupSelectCard{
+  z-index:100;
+}
+
 .row{display:flex;gap:.75rem;flex-wrap:wrap}
 .field{flex:1;min-width:220px}
 label{font-size:.8rem;font-weight:600}
-input,select{width:100%;padding:.45rem;border-radius:8px;border:1px solid #cbd5f5}
+
+input,select{
+  width:100%;
+  padding:.45rem;
+  border-radius:8px;
+  border:1px solid #cbd5f5;
+}
+
 .input-year{max-width:80px}
 .input-result{max-width:70px}
+
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th,td{border:1px solid #e5e7eb;padding:.4rem;text-align:center}
 th{background:#dbeafe}
-button{border:none;border-radius:999px;padding:.9rem;font-size:1rem;
-cursor:pointer;background:#2563eb;color:white;width:100%}
+
+button{
+  border:none;
+  border-radius:999px;
+  padding:.9rem;
+  font-size:1rem;
+  cursor:pointer;
+  background:#2563eb;
+  color:white;
+  width:100%
+}
+
 .winner{padding:.7rem;border-radius:12px;font-weight:700}
 .winner-ok{background:#dcfce7;color:#166534}
 .winner-none{background:#e5e7eb;color:#374151}
@@ -43,7 +76,8 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 </div>
 </div>
 
-<div class="card">
+<!-- 🔑 ID hinzugefügt -->
+<div class="card" id="groupSelectCard">
 <h2>2. Gruppenauswahl</h2>
 <div class="row">
   <div class="field"><label>Gruppe 1 *</label><select id="g1"></select></div>
@@ -84,7 +118,6 @@ const state={};
 async function loadGroups(){
  const r=await fetch("gruppen.txt?"+Date.now());
  const list=(await r.text()).split(/\r?\n/).filter(Boolean);
-
  elG.forEach(s=>{
    s.innerHTML="<option value=''>Bitte wählen…</option>";
    list.forEach(g=>{
@@ -92,16 +125,12 @@ async function loadGroups(){
      o.value=o.textContent=g;
      s.appendChild(o);
    });
-
-   // ✅ EINZIGE KRITISCHE KORREKTUR
-   s.addEventListener("change", () => {
-     requestAnimationFrame(build);
-   });
+   s.onchange=build;
  });
 }
 
 function build(){
- [...elGroups.children].forEach(save);
+ [...elGroups.children].forEach(c=>save(c));
  elGroups.innerHTML="";
  elG.forEach((s,i)=>{
    if(!s.value) return;
@@ -198,7 +227,6 @@ function restore(c){
 function sendAll(){
  location.href=`mailto:${RESULT_EMAIL}?subject=Amtscup Resultat`;
 }
-
 loadGroups();
 </script>
 </body>
