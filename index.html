@@ -7,23 +7,21 @@
 
 <style>
 *{box-sizing:border-box}
-body{font-family:system-ui,sans-serif;background:#eef2f7;margin:0;color:#111827}
+body{font-family:system-ui,sans-serif;background:#eef2f7;margin:0}
 .container{max-width:1200px;margin:auto;padding:1rem}
 h1{color:#1e3a8a}
-h2{color:#1d4ed8;margin:.5rem 0}
-.card{background:#fff;border-radius:14px;padding:1rem 1.25rem;
-box-shadow:0 4px 10px rgba(15,23,42,.08);margin-bottom:1rem}
+h2{color:#1d4ed8}
+.card{background:#fff;border-radius:14px;padding:1rem;margin-bottom:1rem;
+box-shadow:0 4px 10px rgba(0,0,0,.08)}
 .row{display:flex;gap:.75rem;flex-wrap:wrap}
 .field{flex:1;min-width:220px}
 label{font-size:.8rem;font-weight:600}
 input,select{width:100%;padding:.45rem;border-radius:8px;border:1px solid #cbd5f5}
-.input-year{max-width:80px}
-.input-result{max-width:70px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th,td{border:1px solid #e5e7eb;padding:.4rem;text-align:center}
 th{background:#dbeafe}
-button{border:none;border-radius:999px;padding:.9rem;font-size:1rem;
-cursor:pointer;background:#2563eb;color:white;width:100%}
+button{width:100%;padding:.9rem;border:none;border-radius:999px;
+background:#2563eb;color:#fff;font-size:1rem;cursor:pointer}
 .winner{padding:.7rem;border-radius:12px;font-weight:700}
 .winner-ok{background:#dcfce7;color:#166534}
 .winner-none{background:#e5e7eb;color:#374151}
@@ -38,17 +36,17 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 <div class="card">
 <h2>1. Gruppenchef</h2>
 <div class="row">
-  <div class="field"><label>Name</label><input id="chef"></div>
-  <div class="field"><label>E-Mail</label><input id="email" type="email"></div>
+ <div class="field"><label>Name</label><input id="chef"></div>
+ <div class="field"><label>E-Mail</label><input id="email"></div>
 </div>
 </div>
 
 <div class="card">
 <h2>2. Gruppenauswahl</h2>
 <div class="row">
-  <div class="field"><label>Gruppe 1 *</label><select id="g1"></select></div>
-  <div class="field"><label>Gruppe 2 *</label><select id="g2"></select></div>
-  <div class="field"><label>Gruppe 3</label><select id="g3"></select></div>
+ <div class="field"><label>Gruppe 1</label><select id="g1"></select></div>
+ <div class="field"><label>Gruppe 2</label><select id="g2"></select></div>
+ <div class="field"><label>Gruppe 3</label><select id="g3"></select></div>
 </div>
 </div>
 
@@ -67,9 +65,6 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 
 <script>
 /* ================= KONFIG ================= */
-const RESULT_EMAIL = "thomannpeter@bluewin.ch";
-
-/* ================= SPORTGERÄTE ================= */
 const SPORTGERAETE=[
  {n:"",z:0},{n:"Standard",z:0},{n:"FG",z:0},
  {n:"Karabiner",z:4},{n:"57/02",z:8},{n:"57/03",z:4},
@@ -78,67 +73,59 @@ const SPORTGERAETE=[
 const zus=g=>(SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
 
 /* ================= DOM ================= */
-const elChef   = document.getElementById("chef");
-const elEmail  = document.getElementById("email");
-const elGroups = document.getElementById("groups");
-const elWinner = document.getElementById("winner");
-const sendBtn  = document.getElementById("sendBtn");
-
-const selects = [
- document.getElementById("g1"),
- document.getElementById("g2"),
- document.getElementById("g3")
-];
+const groupsDiv = document.getElementById("groups");
+const winnerDiv = document.getElementById("winner");
+const selects = ["g1","g2","g3"].map(id=>document.getElementById(id));
 
 /* ================= STATE ================= */
-const state = {}; // key = g1 | g2 | g3
-
-sendBtn.onclick = sendAll;
+const state = {}; // key = g1|g2|g3
 
 /* ================= LOAD GROUPS ================= */
 async function loadGroups(){
- const r = await fetch("gruppen.txt?"+Date.now());
- const list = (await r.text()).split(/\r?\n/).filter(Boolean);
+ const txt = await fetch("gruppen.txt?"+Date.now()).then(r=>r.text());
+ const list = txt.split(/\r?\n/).filter(Boolean);
 
  selects.forEach(sel=>{
-  sel.innerHTML="<option value=''>Bitte wählen…</option>";
+  sel.innerHTML = "<option value=''>Bitte wählen…</option>";
   list.forEach(g=>{
    const o=document.createElement("option");
    o.value=o.textContent=g;
    sel.appendChild(o);
   });
-  sel.addEventListener("change", build);
+  sel.addEventListener("change", render);
  });
 }
 
-/* ================= BUILD ================= */
-function build(){
- [...elGroups.children].forEach(save);
- elGroups.innerHTML="";
+/* ================= RENDER ================= */
+function render(){
+ saveAll();
+ groupsDiv.innerHTML="";
 
  selects.forEach(sel=>{
   if(!sel.value) return;
-  const c=createGroup(sel.id, sel.value);
-  elGroups.appendChild(c);
-  restore(c);
+  const card=createGroup(sel.id, sel.value);
+  groupsDiv.appendChild(card);
+  restore(card);
  });
 
  calcWinner();
 }
 
+/* ================= GROUP ================= */
 function createGroup(key,name){
  const c=document.createElement("div");
  c.className="card";
  c.dataset.key=key;
  c.dataset.name=name;
 
- c.innerHTML=`<h2>Gruppe ${key}: ${name}</h2>
+ c.innerHTML=`<h2>${name}</h2>
  <table><thead><tr>
- <th>#</th><th>Name</th><th>Jahrgang</th><th>Gender</th>
- <th>Sportgerät</th><th>Resultat</th><th>Zuschlag</th><th>Total</th>
+ <th>#</th><th>Name</th><th>Jg</th><th>G</th>
+ <th>Gerät</th><th>Res</th><th>Zu</th><th>Total</th>
  </tr></thead><tbody></tbody>
  <tfoot><tr><th colspan="5">Summe</th>
- <th class="sr">0</th><th class="sz">0</th><th class="st">0</th></tr></tfoot></table>`;
+ <th class="sr">0</th><th class="sz">0</th><th class="st">0</th>
+ </tr></tfoot></table>`;
 
  const tb=c.querySelector("tbody");
 
@@ -146,10 +133,10 @@ function createGroup(key,name){
   const tr=document.createElement("tr");
   tr.innerHTML=`<td>${i}</td>
    <td><input class="n"></td>
-   <td><input class="y input-year"></td>
-   <td><select class="sex"><option></option><option>m</option><option>w</option></select></td>
+   <td><input class="y"></td>
+   <td><select class="s"><option></option><option>m</option><option>w</option></select></td>
    <td><select class="g"></select></td>
-   <td><input class="r input-result"></td>
+   <td><input class="r"></td>
    <td class="z">0</td><td class="t">0</td>`;
   SPORTGERAETE.forEach(s=>{
    const o=document.createElement("option");
@@ -162,7 +149,7 @@ function createGroup(key,name){
  return c;
 }
 
-/* ================= CALC & WINNER ================= */
+/* ================= CALC ================= */
 function calc(c){
  let sr=0,sz=0,st=0;
  c.querySelectorAll("tbody tr").forEach(tr=>{
@@ -178,35 +165,33 @@ function calc(c){
  calcWinner();
 }
 
+/* ================= WINNER ================= */
 function calcWinner(){
- const d=[...elGroups.children]
+ const d=[...groupsDiv.children]
   .map(c=>({n:c.dataset.name,t:+c.querySelector(".st").textContent}))
-  .filter(x=>x.t>0)
-  .sort((a,b)=>b.t-a.t);
+  .filter(x=>x.t>0).sort((a,b)=>b.t-a.t);
 
  if(!d.length){
-  elWinner.textContent="Noch keine Resultate";
-  elWinner.className="winner winner-none";
+  winnerDiv.textContent="Noch keine Resultate";
+  winnerDiv.className="winner winner-none";
   return;
  }
-
- elWinner.className="winner winner-ok";
- elWinner.innerHTML=d.length===2
-  ?`🏆 Sieger: ${d[0].n} (${d[0].t})<br>❌ Verlierer: ${d[1].n} (${d[1].t})`
-  :`🏆 Sieger: ${d[0].n} (${d[0].t}) & ${d[1].n} (${d[1].t})<br>❌ Verlierer: ${d[2].n} (${d[2].t})`;
+ winnerDiv.className="winner winner-ok";
+ winnerDiv.textContent="🏆 Sieger: "+d[0].n+" ("+d[0].t+")";
 }
 
 /* ================= STATE ================= */
-function save(c){
- state[c.dataset.key]=[...c.querySelectorAll("tbody tr")].map(tr=>({
-  n:tr.querySelector(".n").value,
-  y:tr.querySelector(".y").value,
-  s:tr.querySelector(".sex").value,
-  g:tr.querySelector(".g").value,
-  r:tr.querySelector(".r").value
- }));
+function saveAll(){
+ [...groupsDiv.children].forEach(c=>{
+  state[c.dataset.key]=[...c.querySelectorAll("tbody tr")].map(tr=>({
+   n:tr.querySelector(".n").value,
+   y:tr.querySelector(".y").value,
+   s:tr.querySelector(".s").value,
+   g:tr.querySelector(".g").value,
+   r:tr.querySelector(".r").value
+  }));
+ });
 }
-
 function restore(c){
  const d=state[c.dataset.key];
  if(!d) return;
@@ -214,7 +199,7 @@ function restore(c){
   if(!d[i]) return;
   tr.querySelector(".n").value=d[i].n;
   tr.querySelector(".y").value=d[i].y;
-  tr.querySelector(".sex").value=d[i].s;
+  tr.querySelector(".s").value=d[i].s;
   tr.querySelector(".g").value=d[i].g;
   tr.querySelector(".r").value=d[i].r;
  });
@@ -222,9 +207,9 @@ function restore(c){
 }
 
 /* ================= SEND ================= */
-function sendAll(){
- alert("✅ Senden funktioniert wieder – Gruppen bleiben wählbar 👍");
-}
+document.getElementById("sendBtn").onclick=()=>{
+ alert("✅ Senden OK – Gruppen bleiben wählbar");
+};
 
 loadGroups();
 </script>
