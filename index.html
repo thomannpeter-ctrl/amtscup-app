@@ -84,6 +84,7 @@ const state={};
 async function loadGroups(){
  const r=await fetch("gruppen.txt?"+Date.now());
  const list=(await r.text()).split(/\r?\n/).filter(Boolean);
+
  elG.forEach(s=>{
    s.innerHTML="<option value=''>Bitte wählen…</option>";
    list.forEach(g=>{
@@ -91,13 +92,16 @@ async function loadGroups(){
      o.value=o.textContent=g;
      s.appendChild(o);
    });
-   // 🔴 EINZIGER FIX
-   s.onchange = () => setTimeout(build, 0);
+
+   // ✅ EINZIGE KRITISCHE KORREKTUR
+   s.addEventListener("change", () => {
+     requestAnimationFrame(build);
+   });
  });
 }
 
 function build(){
- [...elGroups.children].forEach(c=>save(c));
+ [...elGroups.children].forEach(save);
  elGroups.innerHTML="";
  elG.forEach((s,i)=>{
    if(!s.value) return;
@@ -192,7 +196,7 @@ function restore(c){
 }
 
 function sendAll(){
- alert("✅ Resultate erfolgreich übermittelt");
+ location.href=`mailto:${RESULT_EMAIL}?subject=Amtscup Resultat`;
 }
 
 loadGroups();
