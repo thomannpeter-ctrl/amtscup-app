@@ -173,7 +173,7 @@ function calcWinner(){
  :`🏆 Sieger: ${d[0].n} (${d[0].t}) & ${d[1].n} (${d[1].t})<br>❌ Verlierer: ${d[2].n} (${d[2].t})`;
 }
 
-/* ================= STATE SAVE ================= */
+/* ================= STATE ================= */
 function save(c){
  state[c.dataset.idx]=[...c.querySelectorAll("tbody tr")].map(tr=>({
   n:tr.querySelector(".n").value,
@@ -210,42 +210,31 @@ function sendAll(){
  if(!valid){ alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein."); return; }
 
  let mail=`AMTSCUP CUP-DUELL\n\nGruppenchef: ${elChef.value}\nE-Mail: ${elEmail.value}\n\n`;
- const rows=[];
 
  [...elGroups.children].forEach((c,i)=>{
-  const gt=c.querySelector(".st").textContent;
+  const sr=c.querySelector(".sr").textContent;
+  const sz=c.querySelector(".sz").textContent;
+  const st=c.querySelector(".st").textContent;
+
   mail+=`GRUPPE ${i+1}: ${c.dataset.name}\n`;
   mail+="Name;Jahrgang;Gender;Sportgerät;Resultat;Zuschlag;Total\n";
+
   c.querySelectorAll("tbody tr").forEach(tr=>{
    const n=tr.querySelector(".n").value;
    const r=tr.querySelector(".r").value;
    if(!n&&!r) return;
-   rows.push({
-    gruppe:c.dataset.name,
-    name:n,
-    jahr:tr.querySelector(".y").value,
-    gender:tr.querySelector(".sex").value,
-    geraet:tr.querySelector(".g").value,
-    resultat:r,
-    zuschlag:tr.querySelector(".z").textContent,
-    total:tr.querySelector(".t").textContent,
-    gruppentotal:gt
-   });
    mail+=`${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${r};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
   });
-  mail+="\n";
+
+  mail+=`\nGRUPPENTOTAL:\n`;
+  mail+=`Resultate ohne Zuschlag: ${sr}\n`;
+  mail+=`Zuschläge total:         ${sz}\n`;
+  mail+=`TOTAL inkl. Zuschlag:    ${st}\n\n`;
  });
 
  mail+="SIEGER:\n"+elWinner.textContent;
 
  location.href=`mailto:${RESULT_EMAIL}?subject=${encodeURIComponent("Amtscup Resultat")}&body=${encodeURIComponent(mail)}`;
-
- fetch(GOOGLE_URL,{
-  method:"POST",
-  mode:"no-cors",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({chef:elChef.value,email:elEmail.value,rows})
- });
 
  alert("✅ Resultate erfolgreich übermittelt");
 }
