@@ -1,4 +1,4 @@
-<!doctype html>  
+<!doctype html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -27,7 +27,7 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 .winner{padding:.7rem;border-radius:12px;font-weight:700}
 .winner-ok{background:#dcfce7;color:#166534}
 .winner-none{background:#e5e7eb;color:#374151}
-.hint{font-size:.8rem;color:#6b7280;margin:.25rem 0 .75rem 0}
+.hint{font-size:.85rem;color:#374151;line-height:1.4}
 </style>
 </head>
 
@@ -37,21 +37,17 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 <h1>Amtscup – Cup-Duell</h1>
 
 <div class="card">
-<h2>1. Gruppenchef</h2>
-
+<h2>Hinweis / Anleitung</h2>
 <div class="hint">
-Bitte Name und E-Mail des meldenden Gruppenchefs eingeben.  
-Anschliessend eine oder mehrere Gruppen auswählen und die Resultate erfassen.
-</div>
-
-<div class="row">
-  <div class="field"><label>Name</label><input id="chef"></div>
-  <div class="field"><label>E-Mail</label><input id="email" type="email"></div>
+Du kannst eine oder zwei Gruppen melden.<br>
+Bei einer 3er-Paarung können alle drei Gruppen gemeldet werden.<br>
+Mindestens eine Gruppe muss vollständig ausgefüllt sein.<br>
+Nach dem Senden bitte das Standblatt als Datei oder Bild per Mail anhängen.
 </div>
 </div>
 
 <div class="card">
-<h2>2. Gruppenauswahl</h2>
+<h2>Gruppenauswahl</h2>
 <div class="row">
   <div class="field"><label>Gruppe 1</label><select id="g1"></select></div>
   <div class="field"><label>Gruppe 2</label><select id="g2"></select></div>
@@ -83,7 +79,7 @@ const SPORTGERAETE=[
 ];
 const zus=g=>(SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
 
-const elChef=chef, elEmail=email, elGroups=groups, elWinner=winner;
+const elGroups=groups, elWinner=winner;
 const elG=[g1,g2,g3];
 sendBtn.onclick=sendAll;
 
@@ -106,13 +102,11 @@ async function loadGroups(){
 function build(){
  elG.forEach((s,i)=>{
   const existing=[...elGroups.children].find(c=>c.dataset.idx==i+1);
-
   if(s.value && !existing){
    const c=createGroup(i+1,s.value);
    elGroups.appendChild(c);
    restore(c);
   }
-
   if(!s.value && existing){
    save(existing);
    existing.remove();
@@ -225,37 +219,19 @@ function sendAll(){
   return;
  }
 
- let mail=`AMTSCUP CUP-DUELL\n\nGruppenchef: ${elChef.value}\nE-Mail: ${elEmail.value}\n\n`;
- const rows=[];
+ let mail=`AMTSCUP CUP-DUELL\n\n`;
 
  [...elGroups.children].forEach((c,i)=>{
   mail+=`GRUPPE ${i+1}: ${c.dataset.name}\n`;
   mail+="Name;Jahrgang;Gender;Sportgerät;Resultat;Zuschlag;Total\n";
-
   c.querySelectorAll("tbody tr").forEach(tr=>{
    const n=tr.querySelector(".n").value;
    const r=tr.querySelector(".r").value;
    if(!n&&!r) return;
-
-   rows.push({
-    gruppe:c.dataset.name,
-    name:n,
-    jahr:tr.querySelector(".y").value,
-    gender:tr.querySelector(".sex").value,
-    geraet:tr.querySelector(".g").value,
-    resultat:r,
-    zuschlag:tr.querySelector(".z").textContent,
-    total:tr.querySelector(".t").textContent,
-    gruppentotal:c.querySelector(".st").textContent
-   });
-
    mail+=`${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${r};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
   });
-
-  mail+=`Summe;;;;${c.querySelector(".sr").textContent};${c.querySelector(".sz").textContent};${c.querySelector(".st").textContent}\n\n`;
+  mail+="\n";
  });
-
- mail+="SIEGER:\n"+elWinner.textContent;
 
  location.href=`mailto:${RESULT_EMAIL}?subject=${encodeURIComponent("Amtscup Resultat")}&body=${encodeURIComponent(mail)}`;
 
@@ -263,7 +239,7 @@ function sendAll(){
   method:"POST",
   mode:"no-cors",
   headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({chef:elChef.value,email:elEmail.value,rows})
+  body:JSON.stringify({rows:[]})
  });
 
  alert("✅ Resultate erfolgreich übermittelt");
