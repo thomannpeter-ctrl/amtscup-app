@@ -82,7 +82,6 @@ sendBtn.onclick=sendAll;
 
 const state={};
 
-/* ===== Gruppen laden ===== */
 async function loadGroups(){
  const r=await fetch("gruppen.txt?"+Date.now());
  const list=(await r.text()).split(/\r?\n/).filter(Boolean);
@@ -97,7 +96,6 @@ async function loadGroups(){
  });
 }
 
-/* ===== FIX: Gruppen bleiben offen ===== */
 function build(){
  elG.forEach((s,i)=>{
   const existing=[...elGroups.children].find(c=>c.dataset.idx==i+1);
@@ -209,9 +207,56 @@ function groupIsComplete(c){
  });
 }
 
+/* ===== SENDEN WIEDER KOMPLETT ===== */
 function sendAll(){
+
  const ok=[...elGroups.children].some(c=>groupIsComplete(c));
- if(!ok){ alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein."); return; }
+ if(!ok){
+  alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein.");
+  return;
+ }
+
+ let mail=`AMTSCUP CUP-DUELL\n\nGruppenchef: ${elChef.value}\nE-Mail: ${elEmail.value}\n\n`;
+ const rows=[];
+
+ [...elGroups.children].forEach((c,i)=>{
+  mail+=`GRUPPE ${i+1}: ${c.dataset.name}\n`;
+  mail+="Name;Jahrgang;Gender;Sportgerät;Resultat;Zuschlag;Total\n";
+
+  c.querySelectorAll("tbody tr").forEach(tr=>{
+   const n=tr.querySelector(".n").value;
+   const r=tr.querySelector(".r").value;
+   if(!n&&!r) return;
+
+   rows.push({
+    gruppe:c.dataset.name,
+    name:n,
+    jahr:tr.querySelector(".y").value,
+    gender:tr.querySelector(".sex").value,
+    geraet:tr.querySelector(".g").value,
+    resultat:r,
+    zuschlag:tr.querySelector(".z").textContent,
+    total:tr.querySelector(".t").textContent,
+    gruppentotal:c.querySelector(".st").textContent
+   });
+
+   mail+=`${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${r};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
+  });
+
+  mail+=`Summe;;;;${c.querySelector(".sr").textContent};${c.querySelector(".sz").textContent};${c.querySelector(".st").textContent}\n\n`;
+ });
+
+ mail+="SIEGER:\n"+elWinner.textContent;
+
+ location.href=`mailto:${RESULT_EMAIL}?subject=${encodeURIComponent("Amtscup Resultat")}&body=${encodeURIComponent(mail)}`;
+
+ fetch(GOOGLE_URL,{
+  method:"POST",
+  mode:"no-cors",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({chef:elChef.value,email:elEmail.value,rows})
+ });
+
  alert("✅ Resultate erfolgreich übermittelt");
 }
 
