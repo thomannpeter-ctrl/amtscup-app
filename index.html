@@ -27,7 +27,6 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 .winner{padding:.7rem;border-radius:12px;font-weight:700}
 .winner-ok{background:#dcfce7;color:#166534}
 .winner-none{background:#e5e7eb;color:#374151}
-.hint{font-size:.85rem;color:#374151;line-height:1.4}
 </style>
 </head>
 
@@ -35,16 +34,6 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 <div class="container">
 
 <h1>Amtscup – Cup-Duell</h1>
-
-<div class="card">
-<h2>Hinweis / Anleitung</h2>
-<div class="hint">
-Du kannst eine oder zwei Gruppen melden.<br>
-Bei einer 3er-Paarung können alle drei Gruppen gemeldet werden.<br>
-Mindestens eine Gruppe muss vollständig ausgefüllt sein.<br>
-Nach dem Senden bitte das Standblatt als Datei oder Bild per Mail anhängen.
-</div>
-</div>
 
 <div class="card">
 <h2>Gruppenauswahl</h2>
@@ -63,29 +52,31 @@ Nach dem Senden bitte das Standblatt als Datei oder Bild per Mail anhängen.
 </div>
 
 <div class="card">
-<button id="sendBtn">📧 Mail & Google senden</button>
+<button onclick="sendAll()">📧 Mail & Google senden</button>
 </div>
 
 </div>
 
 <script>
 const RESULT_EMAIL = "thomannpeter@bluewin.ch";
-const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbxSyhpu2DbNUenazIu7PrY7EuGxfRufmY7fzaIRzB4Rd6IDRE-PtF2V5FRzc5j_3osI/exec";
+const GOOGLE_URL = "HIER_DEINE_NEUE_WEBAPP_URL_EINTRAGEN";
 
-const SPORTGERAETE=[
+const SPORTGERAETE = [
  {n:"",z:0},{n:"Standard",z:0},{n:"FG",z:0},
  {n:"Karabiner",z:4},{n:"57/02",z:8},{n:"57/03",z:4},
  {n:"90BK",z:4},{n:"90RK",z:4}
 ];
-const zus=g=>(SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
+const zus = g => (SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
 
-const elGroups=groups, elWinner=winner;
-const elG=[g1,g2,g3];
-sendBtn.onclick=sendAll;
+const elGroups = document.getElementById("groups");
+const elWinner = document.getElementById("winner");
+const elG = [g1,g2,g3];
+
+loadGroups();
 
 async function loadGroups(){
- const r=await fetch("gruppen.txt?"+Date.now());
- const list=(await r.text()).split(/\r?\n/).filter(Boolean);
+ const r = await fetch("gruppen.txt?"+Date.now());
+ const list = (await r.text()).split(/\r?\n/).filter(Boolean);
  elG.forEach(s=>{
    s.innerHTML="<option value=''>Bitte wählen…</option>";
    list.forEach(g=>{
@@ -98,23 +89,21 @@ async function loadGroups(){
 }
 
 function build(){
+ elGroups.innerHTML="";
  elG.forEach((s,i)=>{
-  const existing=[...elGroups.children].find(c=>c.dataset.idx==i+1);
-  if(s.value && !existing){
-   elGroups.appendChild(createGroup(i+1,s.value));
-  }
-  if(!s.value && existing) existing.remove();
+  if(s.value) elGroups.appendChild(createGroup(i+1,s.value));
  });
  calcWinner();
 }
 
 function createGroup(i,name){
  const c=document.createElement("div");
- c.className="card"; c.dataset.idx=i; c.dataset.name=name;
- c.innerHTML=`<h2>Gruppe ${i}: ${name}</h2>
+ c.className="card";
+ c.dataset.name=name;
+ c.innerHTML=`<h2>${name}</h2>
  <table><thead><tr>
- <th>#</th><th>Name</th><th>Jahrgang</th><th>Gender</th>
- <th>Sportgerät</th><th>Resultat</th><th>Zuschlag</th><th>Total</th>
+ <th>#</th><th>Name</th><th>Jahr</th><th>G</th>
+ <th>Gerät</th><th>Res</th><th>Z</th><th>T</th>
  </tr></thead><tbody></tbody>
  <tfoot><tr><th colspan="5">Summe</th>
  <th class="sr">0</th><th class="sz">0</th><th class="st">0</th></tr></tfoot></table>`;
@@ -159,51 +148,26 @@ function calcWinner(){
  const d=[...elGroups.children]
   .map(c=>({n:c.dataset.name,t:+c.querySelector(".st").textContent}))
   .filter(x=>x.t>0).sort((a,b)=>b.t-a.t);
-
  if(!d.length){
   elWinner.textContent="Noch keine Resultate";
   elWinner.className="winner winner-none";
   return;
  }
  elWinner.className="winner winner-ok";
- elWinner.innerHTML=d.length===2
- ?`🏆 Sieger: ${d[0].n} (${d[0].t})<br>❌ Verlierer: ${d[1].n} (${d[1].t})`
- :`🏆 Sieger: ${d[0].n} (${d[0].t}) & ${d[1].n} (${d[1].t})<br>❌ Verlierer: ${d[2].n} (${d[2].t})`;
-}
-
-function groupIsComplete(c){
- return [...c.querySelectorAll("tbody tr")].some(tr=>{
-  return tr.querySelector(".n").value &&
-         tr.querySelector(".y").value &&
-         tr.querySelector(".sex").value &&
-         tr.querySelector(".g").value &&
-         tr.querySelector(".r").value;
- });
+ elWinner.textContent="🏆 Sieger: "+d[0].n+" ("+d[0].t+")";
 }
 
 function sendAll(){
- const ok=[...elGroups.children].some(c=>groupIsComplete(c));
- if(!ok){
-  alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein.");
-  return;
- }
-
- let mail=`AMTSCUP CUP-DUELL\n\n`;
- const rows=[];
-
+ let rows=[];
  for(const c of elGroups.children){
   for(const tr of c.querySelectorAll("tbody tr")){
    const r=+tr.querySelector(".r").value||0;
-   if(r>150){
-    alert("❗ Resultat darf maximal 150 sein.");
-    return;
-   }
-   const n=tr.querySelector(".n").value;
-   if(!n&&!r) continue;
+   if(r>150){ alert("❗ Resultat max. 150"); return; }
+   if(!tr.querySelector(".n").value) continue;
 
    rows.push({
     gruppe:c.dataset.name,
-    name:n,
+    name:tr.querySelector(".n").value,
     jahr:tr.querySelector(".y").value,
     gender:tr.querySelector(".sex").value,
     geraet:tr.querySelector(".g").value,
@@ -212,23 +176,21 @@ function sendAll(){
     total:tr.querySelector(".t").textContent,
     gruppentotal:c.querySelector(".st").textContent
    });
-
-   mail+=`${c.dataset.name};${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${r};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
   }
  }
 
- location.href=`mailto:${RESULT_EMAIL}?subject=${encodeURIComponent("Amtscup Resultat")}&body=${encodeURIComponent(mail)}`;
+ if(!rows.length){ alert("❗ Keine gültigen Daten"); return; }
 
  fetch(GOOGLE_URL,{
   method:"POST",
-  headers:{"Content-Type":"application/json"},
+  mode:"no-cors",
   body:JSON.stringify({rows})
  });
 
- alert("✅ Resultate erfolgreich übermittelt");
-}
+ location.href=`mailto:${RESULT_EMAIL}?subject=Amtscup Resultat&body=${encodeURIComponent(JSON.stringify(rows,null,2))}`;
 
-loadGroups();
+ alert("✅ Gesendet");
+}
 </script>
 </body>
 </html>
