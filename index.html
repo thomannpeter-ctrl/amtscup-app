@@ -46,8 +46,8 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 <div class="card">
 <h2>2. Gruppenauswahl</h2>
 <div class="row">
-  <div class="field"><label>Gruppe 1 *</label><select id="g1"></select></div>
-  <div class="field"><label>Gruppe 2 *</label><select id="g2"></select></div>
+  <div class="field"><label>Gruppe 1</label><select id="g1"></select></div>
+  <div class="field"><label>Gruppe 2</label><select id="g2"></select></div>
   <div class="field"><label>Gruppe 3</label><select id="g3"></select></div>
 </div>
 </div>
@@ -191,16 +191,25 @@ function restore(c){
  calc(c);
 }
 
-/* ================= SEND (SUMMEN IM MAIL) ================= */
+/* ========= NEU: Prüfen ob Gruppe vollständig ========= */
+function groupIsComplete(c){
+ return [...c.querySelectorAll("tbody tr")].some(tr=>{
+  return tr.querySelector(".n").value &&
+         tr.querySelector(".y").value &&
+         tr.querySelector(".sex").value &&
+         tr.querySelector(".g").value &&
+         tr.querySelector(".r").value;
+ });
+}
+
+/* ================= SEND ================= */
 function sendAll(){
 
- let valid=false;
- [...elGroups.children].forEach(c=>{
-  c.querySelectorAll("tbody tr").forEach(tr=>{
-   if(tr.querySelector(".n").value && tr.querySelector(".r").value) valid=true;
-  });
- });
- if(!valid){ alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein."); return; }
+ const hasValidGroup=[...elGroups.children].some(c=>groupIsComplete(c));
+ if(!hasValidGroup){
+  alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein.");
+  return;
+ }
 
  let mail=`AMTSCUP CUP-DUELL\n\nGruppenchef: ${elChef.value}\nE-Mail: ${elEmail.value}\n\n`;
  const rows=[];
