@@ -1,4 +1,4 @@
-<!doctype html> 
+<!doctype html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -36,11 +36,13 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 <h1>Amtscup – Cup-Duell</h1>
 
 <div class="card">
-<h2>1. Gruppenchef</h2>
-<div class="row">
-  <div class="field"><label>Name</label><input id="chef"></div>
-  <div class="field"><label>E-Mail</label><input id="email" type="email"></div>
-</div>
+<h2>Anleitung</h2>
+<p>
+Du kannst eine oder zwei Gruppen melden.<br>
+Bei 3er-Paarung müssen alle drei Gruppen gemeldet werden.<br>
+Mindestens eine Gruppe muss komplett ausgefüllt sein.<br>
+Nach dem Senden dem Mail das Standblatt als Datei oder Bild anhängen.
+</p>
 </div>
 
 <div class="card">
@@ -76,7 +78,7 @@ const SPORTGERAETE=[
 ];
 const zus=g=>(SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
 
-const elChef=chef, elEmail=email, elGroups=groups, elWinner=winner;
+const elGroups=groups, elWinner=winner;
 const elG=[g1,g2,g3];
 sendBtn.onclick=sendAll;
 
@@ -207,16 +209,14 @@ function groupIsComplete(c){
  });
 }
 
-/* ===== SENDEN WIEDER KOMPLETT ===== */
 function sendAll(){
-
  const ok=[...elGroups.children].some(c=>groupIsComplete(c));
  if(!ok){
   alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein.");
   return;
  }
 
- let mail=`AMTSCUP CUP-DUELL\n\nGruppenchef: ${elChef.value}\nE-Mail: ${elEmail.value}\n\n`;
+ let mail=`AMTSCUP CUP-DUELL\n\n`;
  const rows=[];
 
  [...elGroups.children].forEach((c,i)=>{
@@ -254,7 +254,7 @@ function sendAll(){
   method:"POST",
   mode:"no-cors",
   headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({chef:elChef.value,email:elEmail.value,rows})
+  body:JSON.stringify({rows})
  });
 
  alert("✅ Resultate erfolgreich übermittelt");
