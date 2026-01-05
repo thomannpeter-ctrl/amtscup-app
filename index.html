@@ -1,4 +1,4 @@
-<!doctype html> 
+<!doctype html>  
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -27,6 +27,7 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 .winner{padding:.7rem;border-radius:12px;font-weight:700}
 .winner-ok{background:#dcfce7;color:#166534}
 .winner-none{background:#e5e7eb;color:#374151}
+.hint{font-size:.8rem;color:#6b7280;margin:.25rem 0 .75rem 0}
 </style>
 </head>
 
@@ -37,6 +38,12 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 
 <div class="card">
 <h2>1. Gruppenchef</h2>
+
+<div class="hint">
+Bitte Name und E-Mail des meldenden Gruppenchefs eingeben.  
+Anschliessend eine oder mehrere Gruppen auswählen und die Resultate erfassen.
+</div>
+
 <div class="row">
   <div class="field"><label>Name</label><input id="chef"></div>
   <div class="field"><label>E-Mail</label><input id="email" type="email"></div>
@@ -166,7 +173,11 @@ function calcWinner(){
   .map(c=>({n:c.dataset.name,t:+c.querySelector(".st").textContent}))
   .filter(x=>x.t>0).sort((a,b)=>b.t-a.t);
 
- if(!d.length){ elWinner.textContent="Noch keine Resultate"; elWinner.className="winner winner-none"; return; }
+ if(!d.length){
+  elWinner.textContent="Noch keine Resultate";
+  elWinner.className="winner winner-none";
+  return;
+ }
  elWinner.className="winner winner-ok";
  elWinner.innerHTML=d.length===2
  ?`🏆 Sieger: ${d[0].n} (${d[0].t})<br>❌ Verlierer: ${d[1].n} (${d[1].t})`
@@ -207,9 +218,7 @@ function groupIsComplete(c){
  });
 }
 
-/* ===== SENDEN WIEDER KOMPLETT ===== */
 function sendAll(){
-
  const ok=[...elGroups.children].some(c=>groupIsComplete(c));
  if(!ok){
   alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein.");
