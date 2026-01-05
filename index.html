@@ -83,8 +83,6 @@ const elGroups=groups, elWinner=winner;
 const elG=[g1,g2,g3];
 sendBtn.onclick=sendAll;
 
-const state={};
-
 async function loadGroups(){
  const r=await fetch("gruppen.txt?"+Date.now());
  const list=(await r.text()).split(/\r?\n/).filter(Boolean);
@@ -103,14 +101,9 @@ function build(){
  elG.forEach((s,i)=>{
   const existing=[...elGroups.children].find(c=>c.dataset.idx==i+1);
   if(s.value && !existing){
-   const c=createGroup(i+1,s.value);
-   elGroups.appendChild(c);
-   restore(c);
+   elGroups.appendChild(createGroup(i+1,s.value));
   }
-  if(!s.value && existing){
-   save(existing);
-   existing.remove();
-  }
+  if(!s.value && existing) existing.remove();
  });
  calcWinner();
 }
@@ -198,11 +191,15 @@ function sendAll(){
  let mail=`AMTSCUP CUP-DUELL\n\n`;
  const rows=[];
 
- [...elGroups.children].forEach(c=>{
-  c.querySelectorAll("tbody tr").forEach(tr=>{
+ for(const c of elGroups.children){
+  for(const tr of c.querySelectorAll("tbody tr")){
+   const r=+tr.querySelector(".r").value||0;
+   if(r>150){
+    alert("❗ Resultat darf maximal 150 sein.");
+    return;
+   }
    const n=tr.querySelector(".n").value;
-   const r=tr.querySelector(".r").value;
-   if(!n&&!r) return;
+   if(!n&&!r) continue;
 
    rows.push({
     gruppe:c.dataset.name,
@@ -217,14 +214,13 @@ function sendAll(){
    });
 
    mail+=`${c.dataset.name};${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${r};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
-  });
- });
+  }
+ }
 
  location.href=`mailto:${RESULT_EMAIL}?subject=${encodeURIComponent("Amtscup Resultat")}&body=${encodeURIComponent(mail)}`;
 
  fetch(GOOGLE_URL,{
   method:"POST",
-  mode:"no-cors",
   headers:{"Content-Type":"application/json"},
   body:JSON.stringify({rows})
  });
