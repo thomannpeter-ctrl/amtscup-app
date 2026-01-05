@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html> 
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -36,7 +36,15 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 <h1>Amtscup – Cup-Duell</h1>
 
 <div class="card">
-<h2>Gruppenauswahl</h2>
+<h2>1. Gruppenchef</h2>
+<div class="row">
+  <div class="field"><label>Name</label><input id="chef"></div>
+  <div class="field"><label>E-Mail</label><input id="email" type="email"></div>
+</div>
+</div>
+
+<div class="card">
+<h2>2. Gruppenauswahl</h2>
 <div class="row">
   <div class="field"><label>Gruppe 1</label><select id="g1"></select></div>
   <div class="field"><label>Gruppe 2</label><select id="g2"></select></div>
@@ -52,31 +60,31 @@ cursor:pointer;background:#2563eb;color:white;width:100%}
 </div>
 
 <div class="card">
-<button onclick="sendAll()">📧 Mail & Google senden</button>
+<button id="sendBtn">📧 Mail & Google senden</button>
 </div>
 
 </div>
 
 <script>
 const RESULT_EMAIL = "thomannpeter@bluewin.ch";
-const GOOGLE_URL = "HIER_DEINE_NEUE_WEBAPP_URL_EINTRAGEN";
+const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz1ZQO-T2JbllYVwwILeAS20iq0nFLGvdKcxgYz2_bs9TNmLmm5tQnfB9PfeTTBJ_oI/exec";
 
-const SPORTGERAETE = [
+const SPORTGERAETE=[
  {n:"",z:0},{n:"Standard",z:0},{n:"FG",z:0},
  {n:"Karabiner",z:4},{n:"57/02",z:8},{n:"57/03",z:4},
  {n:"90BK",z:4},{n:"90RK",z:4}
 ];
-const zus = g => (SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
+const zus=g=>(SPORTGERAETE.find(x=>x.n===g)||{z:0}).z;
 
-const elGroups = document.getElementById("groups");
-const elWinner = document.getElementById("winner");
-const elG = [g1,g2,g3];
+const elChef=chef, elEmail=email, elGroups=groups, elWinner=winner;
+const elG=[g1,g2,g3];
+sendBtn.onclick=sendAll;
 
-loadGroups();
+const state={};
 
 async function loadGroups(){
- const r = await fetch("gruppen.txt?"+Date.now());
- const list = (await r.text()).split(/\r?\n/).filter(Boolean);
+ const r=await fetch("gruppen.txt?"+Date.now());
+ const list=(await r.text()).split(/\r?\n/).filter(Boolean);
  elG.forEach(s=>{
    s.innerHTML="<option value=''>Bitte wählen…</option>";
    list.forEach(g=>{
@@ -89,21 +97,30 @@ async function loadGroups(){
 }
 
 function build(){
- elGroups.innerHTML="";
  elG.forEach((s,i)=>{
-  if(s.value) elGroups.appendChild(createGroup(i+1,s.value));
+  const existing=[...elGroups.children].find(c=>c.dataset.idx==i+1);
+
+  if(s.value && !existing){
+   const c=createGroup(i+1,s.value);
+   elGroups.appendChild(c);
+   restore(c);
+  }
+
+  if(!s.value && existing){
+   save(existing);
+   existing.remove();
+  }
  });
  calcWinner();
 }
 
 function createGroup(i,name){
  const c=document.createElement("div");
- c.className="card";
- c.dataset.name=name;
- c.innerHTML=`<h2>${name}</h2>
+ c.className="card"; c.dataset.idx=i; c.dataset.name=name;
+ c.innerHTML=`<h2>Gruppe ${i}: ${name}</h2>
  <table><thead><tr>
- <th>#</th><th>Name</th><th>Jahr</th><th>G</th>
- <th>Gerät</th><th>Res</th><th>Z</th><th>T</th>
+ <th>#</th><th>Name</th><th>Jahrgang</th><th>Gender</th>
+ <th>Sportgerät</th><th>Resultat</th><th>Zuschlag</th><th>Total</th>
  </tr></thead><tbody></tbody>
  <tfoot><tr><th colspan="5">Summe</th>
  <th class="sr">0</th><th class="sz">0</th><th class="st">0</th></tr></tfoot></table>`;
@@ -148,26 +165,72 @@ function calcWinner(){
  const d=[...elGroups.children]
   .map(c=>({n:c.dataset.name,t:+c.querySelector(".st").textContent}))
   .filter(x=>x.t>0).sort((a,b)=>b.t-a.t);
- if(!d.length){
-  elWinner.textContent="Noch keine Resultate";
-  elWinner.className="winner winner-none";
-  return;
- }
+
+ if(!d.length){ elWinner.textContent="Noch keine Resultate"; elWinner.className="winner winner-none"; return; }
  elWinner.className="winner winner-ok";
- elWinner.textContent="🏆 Sieger: "+d[0].n+" ("+d[0].t+")";
+ elWinner.innerHTML=d.length===2
+ ?`🏆 Sieger: ${d[0].n} (${d[0].t})<br>❌ Verlierer: ${d[1].n} (${d[1].t})`
+ :`🏆 Sieger: ${d[0].n} (${d[0].t}) & ${d[1].n} (${d[1].t})<br>❌ Verlierer: ${d[2].n} (${d[2].t})`;
 }
 
+function save(c){
+ state[c.dataset.idx]=[...c.querySelectorAll("tbody tr")].map(tr=>({
+  n:tr.querySelector(".n").value,
+  y:tr.querySelector(".y").value,
+  s:tr.querySelector(".sex").value,
+  g:tr.querySelector(".g").value,
+  r:tr.querySelector(".r").value
+ }));
+}
+
+function restore(c){
+ const d=state[c.dataset.idx];
+ if(!d) return;
+ c.querySelectorAll("tbody tr").forEach((tr,i)=>{
+  if(!d[i]) return;
+  tr.querySelector(".n").value=d[i].n;
+  tr.querySelector(".y").value=d[i].y;
+  tr.querySelector(".sex").value=d[i].s;
+  tr.querySelector(".g").value=d[i].g;
+  tr.querySelector(".r").value=d[i].r;
+ });
+ calc(c);
+}
+
+function groupIsComplete(c){
+ return [...c.querySelectorAll("tbody tr")].some(tr=>{
+  return tr.querySelector(".n").value &&
+         tr.querySelector(".y").value &&
+         tr.querySelector(".sex").value &&
+         tr.querySelector(".g").value &&
+         tr.querySelector(".r").value;
+ });
+}
+
+/* ===== SENDEN WIEDER KOMPLETT ===== */
 function sendAll(){
- let rows=[];
- for(const c of elGroups.children){
-  for(const tr of c.querySelectorAll("tbody tr")){
-   const r=+tr.querySelector(".r").value||0;
-   if(r>150){ alert("❗ Resultat max. 150"); return; }
-   if(!tr.querySelector(".n").value) continue;
+
+ const ok=[...elGroups.children].some(c=>groupIsComplete(c));
+ if(!ok){
+  alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein.");
+  return;
+ }
+
+ let mail=`AMTSCUP CUP-DUELL\n\nGruppenchef: ${elChef.value}\nE-Mail: ${elEmail.value}\n\n`;
+ const rows=[];
+
+ [...elGroups.children].forEach((c,i)=>{
+  mail+=`GRUPPE ${i+1}: ${c.dataset.name}\n`;
+  mail+="Name;Jahrgang;Gender;Sportgerät;Resultat;Zuschlag;Total\n";
+
+  c.querySelectorAll("tbody tr").forEach(tr=>{
+   const n=tr.querySelector(".n").value;
+   const r=tr.querySelector(".r").value;
+   if(!n&&!r) return;
 
    rows.push({
     gruppe:c.dataset.name,
-    name:tr.querySelector(".n").value,
+    name:n,
     jahr:tr.querySelector(".y").value,
     gender:tr.querySelector(".sex").value,
     geraet:tr.querySelector(".g").value,
@@ -176,21 +239,28 @@ function sendAll(){
     total:tr.querySelector(".t").textContent,
     gruppentotal:c.querySelector(".st").textContent
    });
-  }
- }
 
- if(!rows.length){ alert("❗ Keine gültigen Daten"); return; }
+   mail+=`${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${r};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
+  });
+
+  mail+=`Summe;;;;${c.querySelector(".sr").textContent};${c.querySelector(".sz").textContent};${c.querySelector(".st").textContent}\n\n`;
+ });
+
+ mail+="SIEGER:\n"+elWinner.textContent;
+
+ location.href=`mailto:${RESULT_EMAIL}?subject=${encodeURIComponent("Amtscup Resultat")}&body=${encodeURIComponent(mail)}`;
 
  fetch(GOOGLE_URL,{
   method:"POST",
   mode:"no-cors",
-  body:JSON.stringify({rows})
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({chef:elChef.value,email:elEmail.value,rows})
  });
 
- location.href=`mailto:${RESULT_EMAIL}?subject=Amtscup Resultat&body=${encodeURIComponent(JSON.stringify(rows,null,2))}`;
-
- alert("✅ Gesendet");
+ alert("✅ Resultate erfolgreich übermittelt");
 }
+
+loadGroups();
 </script>
 </body>
 </html>
