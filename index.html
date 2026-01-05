@@ -178,30 +178,6 @@ function calcWinner(){
  :`🏆 Sieger: ${d[0].n} (${d[0].t}) & ${d[1].n} (${d[1].t})<br>❌ Verlierer: ${d[2].n} (${d[2].t})`;
 }
 
-function save(c){
- state[c.dataset.idx]=[...c.querySelectorAll("tbody tr")].map(tr=>({
-  n:tr.querySelector(".n").value,
-  y:tr.querySelector(".y").value,
-  s:tr.querySelector(".sex").value,
-  g:tr.querySelector(".g").value,
-  r:tr.querySelector(".r").value
- }));
-}
-
-function restore(c){
- const d=state[c.dataset.idx];
- if(!d) return;
- c.querySelectorAll("tbody tr").forEach((tr,i)=>{
-  if(!d[i]) return;
-  tr.querySelector(".n").value=d[i].n;
-  tr.querySelector(".y").value=d[i].y;
-  tr.querySelector(".sex").value=d[i].s;
-  tr.querySelector(".g").value=d[i].g;
-  tr.querySelector(".r").value=d[i].r;
- });
- calc(c);
-}
-
 function groupIsComplete(c){
  return [...c.querySelectorAll("tbody tr")].some(tr=>{
   return tr.querySelector(".n").value &&
@@ -220,17 +196,28 @@ function sendAll(){
  }
 
  let mail=`AMTSCUP CUP-DUELL\n\n`;
+ const rows=[];
 
- [...elGroups.children].forEach((c,i)=>{
-  mail+=`GRUPPE ${i+1}: ${c.dataset.name}\n`;
-  mail+="Name;Jahrgang;Gender;Sportgerät;Resultat;Zuschlag;Total\n";
+ [...elGroups.children].forEach(c=>{
   c.querySelectorAll("tbody tr").forEach(tr=>{
    const n=tr.querySelector(".n").value;
    const r=tr.querySelector(".r").value;
    if(!n&&!r) return;
-   mail+=`${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${r};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
+
+   rows.push({
+    gruppe:c.dataset.name,
+    name:n,
+    jahr:tr.querySelector(".y").value,
+    gender:tr.querySelector(".sex").value,
+    geraet:tr.querySelector(".g").value,
+    resultat:r,
+    zuschlag:tr.querySelector(".z").textContent,
+    total:tr.querySelector(".t").textContent,
+    gruppentotal:c.querySelector(".st").textContent
+   });
+
+   mail+=`${c.dataset.name};${n};${tr.querySelector(".y").value};${tr.querySelector(".sex").value};${tr.querySelector(".g").value};${r};${tr.querySelector(".z").textContent};${tr.querySelector(".t").textContent}\n`;
   });
-  mail+="\n";
  });
 
  location.href=`mailto:${RESULT_EMAIL}?subject=${encodeURIComponent("Amtscup Resultat")}&body=${encodeURIComponent(mail)}`;
@@ -239,7 +226,7 @@ function sendAll(){
   method:"POST",
   mode:"no-cors",
   headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({rows:[]})
+  body:JSON.stringify({rows})
  });
 
  alert("✅ Resultate erfolgreich übermittelt");
