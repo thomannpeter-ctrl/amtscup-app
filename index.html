@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html> 
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -17,11 +17,24 @@ box-shadow:0 4px 10px rgba(15,23,42,.08);margin-bottom:1rem}
 .field{flex:1;min-width:220px}
 label{font-size:.8rem;font-weight:600}
 input,select{width:100%;padding:.45rem;border-radius:8px;border:1px solid #cbd5f5}
-.input-year{max-width:80px}
-.input-result{max-width:70px}
-table{width:100%;border-collapse:collapse;font-size:.85rem}
-th,td{border:1px solid #e5e7eb;padding:.4rem;text-align:center}
+.input-year{max-width:70px}
+.input-result{max-width:60px}
+
+/* Tabellen-Layout */
+table{width:100%;border-collapse:collapse;font-size:.85rem;table-layout:fixed}
+th,td{border:1px solid #e5e7eb;padding:.3rem;text-align:center}
 th{background:#dbeafe}
+
+/* Spaltenbreiten */
+th:nth-child(1), td:nth-child(1){width:5%}   /* # */
+th:nth-child(2), td:nth-child(2){width:30%}  /* Name – breiter */
+th:nth-child(3), td:nth-child(3){width:10%}  /* Jahrgang */
+th:nth-child(4), td:nth-child(4){width:8%}   /* Gender */
+th:nth-child(5), td:nth-child(5){width:17%}  /* Sportgerät */
+th:nth-child(6), td:nth-child(6){width:10%}  /* Resultat */
+th:nth-child(7), td:nth-child(7){width:10%}  /* Zuschlag */
+th:nth-child(8), td:nth-child(8){width:10%}  /* Total */
+
 button{border:none;border-radius:999px;padding:.9rem;font-size:1rem;
 cursor:pointer;background:#2563eb;color:white;width:100%}
 .winner{padding:.7rem;border-radius:12px;font-weight:700}
