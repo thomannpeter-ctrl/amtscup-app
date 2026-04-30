@@ -27,6 +27,7 @@
       padding: 1rem 1.25rem;
       box-shadow: 0 4px 10px rgba(15,23,42,.08);
       margin-bottom: 1rem;
+      overflow-x: auto;
     }
 
     .row {
@@ -52,14 +53,15 @@
       border: 1px solid #cbd5f5;
     }
 
-    .input-year { max-width: 70px; }
-    .input-result { max-width: 60px; }
+    .input-year { max-width: 76px; }
+    .input-result { max-width: 64px; }
 
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: .85rem;
       table-layout: fixed;
+      min-width: 720px;
     }
 
     th, td {
@@ -73,8 +75,8 @@
     }
 
     th:nth-child(1), td:nth-child(1) { width: 5%; }
-    th:nth-child(2), td:nth-child(2) { width: 30%; }
-    th:nth-child(3), td:nth-child(3) { width: 10%; }
+    th:nth-child(2), td:nth-child(2) { width: 29%; }
+    th:nth-child(3), td:nth-child(3) { width: 11%; }
     th:nth-child(4), td:nth-child(4) { width: 8%; }
     th:nth-child(5), td:nth-child(5) { width: 17%; }
     th:nth-child(6), td:nth-child(6) { width: 10%; }
@@ -218,6 +220,10 @@
       elStatus.className = "status";
     }
 
+    function isValidYear(value) {
+      return /^\d{4}$/.test(String(value || "").trim());
+    }
+
     async function loadGroups() {
       try {
         const response = await fetch("gruppen.txt?" + Date.now());
@@ -313,7 +319,7 @@
         tr.innerHTML = `
           <td>${n}</td>
           <td><input class="n"></td>
-          <td><input class="y input-year"></td>
+          <td><input class="y input-year" type="text" inputmode="numeric" pattern="\\d{4}" minlength="4" maxlength="4" placeholder="JJJJ"></td>
           <td>
             <select class="sex">
               <option value=""></option>
@@ -429,7 +435,7 @@
     function rowIsComplete(tr) {
       return (
         tr.querySelector(".n").value.trim() &&
-        tr.querySelector(".y").value.trim() &&
+        isValidYear(tr.querySelector(".y").value) &&
         tr.querySelector(".sex").value.trim() &&
         tr.querySelector(".g").value.trim() &&
         tr.querySelector(".r").value.trim()
@@ -488,7 +494,7 @@
       const hasCompleteGroup = [...elGroups.children].some(card => groupHasAtLeastOneCompleteRow(card));
 
       if (!hasCompleteGroup) {
-        alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein.");
+        alert("❗ Mindestens eine Gruppe muss vollständig ausgefüllt sein. Jahrgang bitte im Format JJJJ eingeben, z. B. 1988.");
         return;
       }
 
@@ -496,6 +502,13 @@
 
       if (!rows.length) {
         alert("❗ Keine Resultate zum Senden vorhanden.");
+        return;
+      }
+
+      const invalidYearRow = rows.find(row => !isValidYear(row.jahr));
+
+      if (invalidYearRow) {
+        alert(`❗ Ungültiger Jahrgang bei ${invalidYearRow.name || "einem Schützen"}. Bitte Jahrgang 4-stellig eingeben, z. B. 1988.`);
         return;
       }
 
