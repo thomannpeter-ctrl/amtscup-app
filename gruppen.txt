@@ -1,32 +1,16 @@
-1 Heim;3;A022;Häutligen FS;Eggacher
-1 Gast;3;A014;Falkenfluh-Schützen;Falkenfluh
-2 Heim;3;A053;Schützen Grosshöchstetten;Waldrand
-2 Gast;3;A023;Häutligen FS;Gantrisch
-3 Heim;3;A041;Oberdiessbach SG;Mouchenwasser
-3 Gast;3;A067;Wichtrach Schützen;Top- Gun
-4 Heim;3;A034;Linden FS;Alfa Romeo
-4 Gast;3;A032;Kratzmattschützen;Elenor
-5 Heim;3;A058;Sportschützen Münsingen;Zentrum
-5 Gast;3;A017;Gysenstein FS;Amboss
-6 Heim;3;A062;Trimstein Eichi FS;Rambo
-6 Gast;3;A006;Arni FS;Gunners
-7 Heim;3;A019;Gysenstein FS;Hobel
-7 Gast;3;A015;Falkenfluh-Schützen;Feuerstein
-8 Heim;3;A024;Häutligen FS;Wolfmatt
-8 Gast;3;A048;Oberthal MS;TEAM 86
-9 Heim;3;A035;Linden FS;Innerbirrmoos
-9 Gast;3;A054;Sportschützen Furth;Kobra
-10 Heim;3;A057;Sportschützen Furth;Zorro
-10 Gast;3;A044;Oberthal MS;Guggiwäudli
-11 Heim;3;A013;Falkenfluh-Schützen;Alt u. Jung
-11 Gast;3;A020;Gysenstein FS;Ringkorn
-12 Heim;3;A033;Kratzmattschützen;Schützenbrüder
-12 Gast;3;A043;Oberthal MS;Eintracht
-13 Heim;3;A010;Bowil MS;A- Team
-13 Gast;3;A039;Oberdiessbach SG;Ganztal
-14 Heim;3;A011;Bowil MS;Dürrbach
-14 Gast;3;A026;Konolfingen SG;Die Unbekannte
-15 Heim;3;A045;Oberthal MS;Hasechlupf
-15 Gast;3;A040;Oberdiessbach SG;Madagaskar
-16 Heim;3;A055;Sportschützen Furth;Pflümli
-16 Gast;3;A066;Wichtrach Schützen;Luchs
+1 Heim;4;A040;Oberdiessbach SG;Madagaskar
+1 Gast;4;A054;Sportschützen Furth;Kobra
+2 Heim;4;A022;Häutligen FS;Eggacher
+2 Gast;4;A043;Oberthal MS;Eintracht
+3 Heim;4;A026;Konolfingen SG;Die Unbekannte
+3 Gast;4;A034;Linden FS;Alfa Romeo
+4 Heim;4;A057;Sportschützen Furth;Zorro
+4 Gast;4;A019;Gysenstein FS;Hobel
+5 Heim;4;A017;Gysenstein FS;Amboss
+5 Gast;4;A041;Oberdiessbach SG;Mouchenwasser
+6 Heim;4;A024;Häutligen FS;Wolfmatt
+6 Gast;4;A020;Gysenstein FS;Ringkorn
+7 Heim;4;A062;Trimstein Eichi FS;Rambo
+7 Gast;4;A010;Bowil MS;A- Team
+8 Heim;4;A053;Schützen Grosshöchstetten;Waldrand
+8 Gast;4;A055;Sportschützen Furth;Pflümli
